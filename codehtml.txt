@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ระบบยืม-คืน อุปกรณ์วิทยาศาสตร์ | ห้องปฏิบัติการทางสัตวศาสตร์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#0f3d27; --green-800:#146239; --green-700:#1a7a45; --green-600:#1f8f50; --green-100:#e5f6ec;
+    --blue-600:#2563eb; --blue-100:#e6efff;
+    --amber-600:#d97706; --amber-100:#fff2e0;
+    --red-600:#dc2626; --red-100:#fde9e9;
+    --purple-600:#7c3aed; --purple-100:#f0e9fd;
+    --pink-600:#db2777; --pink-100:#fde8f2;
+    --indigo-600:#4f46e5; --indigo-100:#e8eaff;
+    --gray-600:#64748b; --gray-100:#eef1f5;
+    --ink:#182231; --muted:#64748b; --line:#e5e9ef; --bg:#f3f5f8; --card:#ffffff;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(15,42,30,.05), 0 10px 26px rgba(15,42,30,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Noto Sans Thai','Inter',sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  a{text-decoration:none;color:inherit;} button{font-family:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px;}
+
+  .conn-banner{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12.5px;font-weight:600;padding:6px 10px;text-align:center;}
+  .conn-banner.ok{background:var(--green-100);color:var(--green-800);}
+  .conn-banner.demo{background:var(--amber-100);color:var(--amber-600);}
+  .conn-banner svg{width:14px;height:14px;flex-shrink:0;}
+
+  .app{display:flex;min-height:100vh;}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    width:270px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .sb-brand{display:flex;align-items:center;gap:12px;padding:20px 20px 16px;}
+  .sb-logo{width:52px;height:52px;border-radius:50%;flex-shrink:0;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .sb-logo img{width:100%;height:100%;object-fit:contain;}
+  .sb-brand h1{font-size:15px;margin:0;color:var(--green-800);font-weight:800;line-height:1.35;}
+  .sb-brand p{font-size:11px;margin:2px 0 0;color:var(--muted);line-height:1.5;}
+
+  .sb-nav{flex:1;padding:6px 12px;}
+  .sb-nav button{
+    position:relative;
+    width:100%;display:flex;align-items:center;gap:12px;
+    background:transparent;border:none;color:#3c4658;
+    font-size:14px;font-weight:600;padding:11px 14px;border-radius:10px;
+    cursor:pointer;text-align:right;margin-bottom:3px;transition:background .15s,color .15s;
+  }
+  .sb-nav button svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-nav button:hover{background:var(--green-100);color:var(--green-800);}
+  .sb-nav button.active{background:var(--green-700);color:#fff;}
+  .sb-nav .sb-divider{height:1px;background:var(--line);margin:10px 6px;}
+  .nav-badge{position:absolute;top:6px;right:8px;background:var(--red-600);color:#fff;font-size:10px;font-weight:800;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+
+  .sb-illust{
+    margin:auto 14px 0;padding:18px 16px 16px;border-radius:16px;
+    background:linear-gradient(160deg,#eafaf0,#d8f3e2);
+    position:relative;overflow:hidden;
+  }
+  .sb-illust .emoji-row{font-size:30px;line-height:1;margin-bottom:8px;letter-spacing:6px;}
+  .sb-illust h3{margin:0 0 4px;font-size:13px;color:var(--green-900);font-weight:800;}
+  .sb-illust p{margin:0;font-size:10.5px;color:#3f6a52;line-height:1.6;}
+
+  /* ===== Main ===== */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;background:#fff;border-bottom:1px solid var(--line);gap:16px;
+  }
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .hamburger{width:40px;height:40px;border-radius:10px;background:var(--green-700);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+  .hamburger svg{width:20px;height:20px;}
+  .topbar-logo{display:none;width:34px;height:34px;object-fit:contain;border-radius:50%;flex-shrink:0;background:#fff;border:1px solid var(--line);}
+  .page-title{font-size:20px;font-weight:800;color:var(--ink);margin:0;}
+  .topbar-right{display:flex;align-items:center;gap:16px;}
+  .bell-btn{position:relative;width:42px;height:42px;border-radius:50%;background:#f1f5f9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#475569;flex-shrink:0;}
+  .bell-btn svg{width:20px;height:20px;}
+  .bell-badge{position:absolute;top:4px;right:5px;width:16px;height:16px;border-radius:50%;background:var(--red-600);color:#fff;font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .user-chip{display:flex;align-items:center;gap:10px;cursor:default;}
+  .user-chip .avatar{width:38px;height:38px;border-radius:50%;background:var(--green-600);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+  .user-chip .u-name{font-size:13.5px;font-weight:700;line-height:1.3;}
+  .user-chip .u-role{font-size:11.5px;color:var(--muted);line-height:1.3;}
+
+  .content{padding:24px 28px 48px;flex:1;}
+  .view{display:none;} .view.active{display:block;}
+  .greeting{font-size:14px;color:var(--muted);margin:2px 0 22px;}
+  .greeting b{color:var(--ink);}
+
+  /* ===== Stat cards ===== */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-bottom:22px;}
+  .stat-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);padding:18px 20px;display:flex;align-items:center;gap:16px;position:relative;}
+  .stat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .stat-icon svg{width:26px;height:26px;}
+  .stat-icon.green{background:var(--green-100);color:var(--green-700);}
+  .stat-icon.blue{background:var(--blue-100);color:var(--blue-600);}
+  .stat-icon.amber{background:var(--amber-100);color:var(--amber-600);}
+  .stat-icon.red{background:var(--red-100);color:var(--red-600);}
+  .stat-icon.purple{background:var(--purple-100);color:var(--purple-600);}
+  .stat-label{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:2px;}
+  .stat-value{font-size:24px;font-weight:800;color:var(--ink);line-height:1.2;}
+  .stat-value span{font-size:13px;font-weight:600;color:var(--muted);}
+  .stat-sub{font-size:11.5px;color:var(--muted);margin-top:1px;}
+  .stat-dot{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--red-600);}
+
+  /* ===== Layout grid for dashboard ===== */
+  .dash-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:1080px){.dash-grid{grid-template-columns:1fr;}}
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);}
+  .card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap;}
+  .card-head h3{font-size:15.5px;font-weight:700;margin:0;color:var(--ink);}
+  .card-body{padding:16px 20px 20px;}
+  .link-btn{background:#f1f5f9;border:1px solid var(--line);color:var(--ink);padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .link-btn:hover{background:#e6ebf2;}
+
+  table.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  table.data-table th{text-align:right;color:var(--muted);font-weight:700;font-size:12px;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  table.data-table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  table.data-table tr:last-child td{border-bottom:none;}
+  .who-cell{display:flex;align-items:center;gap:9px;}
+  .who-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-100);color:var(--green-700);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0;}
+  .who-name{font-weight:600;font-size:13px;}
+  .who-sub{font-size:11px;color:var(--muted);}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;}
+  .badge.due-soon{background:var(--amber-100);color:var(--amber-600);}
+  .badge.overdue{background:var(--red-100);color:var(--red-600);}
+  .badge.returned{background:var(--green-100);color:var(--green-700);}
+  .badge.borrowing{background:var(--blue-100);color:var(--blue-600);}
+  .badge.pending{background:var(--purple-100);color:var(--purple-600);}
+  .badge.cancelled{background:var(--gray-100);color:var(--gray-600);}
+
+  .btn-plain-center{display:flex;justify-content:center;margin-top:16px;}
+  .btn-outline-full{background:#fff;border:1.5px solid var(--green-700);color:var(--green-700);padding:11px 20px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .btn-outline-full:hover{background:var(--green-100);}
+
+  /* ===== Reminder list ===== */
+  .reminder-item{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .reminder-item:last-child{border-bottom:none;}
+  .reminder-icon{width:38px;height:38px;border-radius:50%;background:var(--amber-100);color:var(--amber-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .reminder-icon svg{width:18px;height:18px;}
+  .reminder-icon.today{background:var(--red-100);color:var(--red-600);}
+  .reminder-title{font-weight:700;font-size:13.5px;color:var(--ink);}
+  .reminder-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+
+  /* ===== Quick menu ===== */
+  .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;}
+  .quick-item{
+    border-radius:12px;padding:16px 10px;text-align:center;cursor:pointer;border:none;
+    display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink);
+    transition:transform .15s;
+  }
+  .quick-item:hover{transform:translateY(-2px);}
+  .quick-item .qi-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .quick-item .qi-icon svg{width:22px;height:22px;color:#fff;}
+  .qi-green{background:var(--green-100);} .qi-green .qi-icon{background:var(--green-600);}
+  .qi-blue{background:var(--blue-100);} .qi-blue .qi-icon{background:var(--blue-600);}
+  .qi-amber{background:var(--amber-100);} .qi-amber .qi-icon{background:var(--amber-600);}
+  .qi-purple{background:var(--purple-100);} .qi-purple .qi-icon{background:var(--purple-600);}
+  .qi-teal{background:#e3f7f5;} .qi-teal .qi-icon{background:#0d9488;}
+  .qi-pink{background:var(--pink-100);} .qi-pink .qi-icon{background:var(--pink-600);}
+  .qi-indigo{background:var(--indigo-100);} .qi-indigo .qi-icon{background:var(--indigo-600);}
+
+  /* ===== Forms ===== */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  label{font-size:13.5px;font-weight:600;color:#334155;}
+  label .req{color:var(--red-600);}
+  .checkbox-row{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:#334155;flex-direction:row;margin-top:26px;}
+  .checkbox-row input{width:17px;height:17px;flex-shrink:0;}
+  input[type=text],input[type=date],input[type=number],input[type=tel],input[type=password],input[type=file],select,textarea{
+    border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:var(--ink);background:#fff;outline:none;transition:border-color .15s, box-shadow .15s;width:100%;
+  }
+  input:focus,select:focus{border-color:var(--green-600);box-shadow:0 0 0 3px rgba(31,143,80,.15);}
+  input.err,select.err{border-color:var(--red-600);box-shadow:0 0 0 3px rgba(220,38,38,.1);}
+  .err-msg{font-size:11.5px;color:var(--red-600);display:none;}
+  .err-msg.show{display:block;}
+  .avail-hint{font-size:12px;color:var(--muted);margin-top:2px;}
+  .btn-primary{background:var(--green-700);color:#fff;border:none;border-radius:9px;padding:13px 20px;font-size:14.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+  .btn-primary:hover{background:var(--green-800);}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+  .btn-secondary{background:#f1f5f9;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:13px 20px;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .btn-secondary:hover{background:#e6ebf2;}
+  .form-actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;}
+
+  .search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-row input, .search-row select{flex:1;min-width:180px;}
+
+  .equip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+  .equip-card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff;}
+  .equip-name{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .equip-cat{font-size:11.5px;color:var(--muted);margin-bottom:10px;}
+  .equip-qty{display:flex;justify-content:space-between;font-size:12.5px;color:#334155;}
+  .equip-bar{height:6px;border-radius:4px;background:#eef1f5;margin-top:8px;overflow:hidden;}
+  .equip-bar-fill{height:100%;background:var(--green-600);border-radius:4px;}
+
+  /* ===== Equipment thumbnails ===== */
+  .eq-thumb{width:100%;height:110px;border-radius:10px;overflow:hidden;background:var(--green-100);display:flex;align-items:center;justify-content:center;margin-bottom:8px;color:var(--green-700);font-weight:800;font-size:26px;}
+  .eq-thumb img{width:100%;height:100%;object-fit:cover;}
+
+  /* ===== Item picker (multi-item borrow) ===== */
+  .ip-search{margin-bottom:10px;}
+  .ip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px;max-height:360px;overflow-y:auto;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fafbfc;}
+  .ip-card{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .ip-card .eq-thumb{height:64px;font-size:20px;margin-bottom:2px;}
+  .ip-card.ip-disabled{opacity:.5;}
+  .ip-card-name{font-size:11.5px;font-weight:700;line-height:1.3;min-height:2.5em;}
+  .ip-card-avail{font-size:10.5px;color:var(--muted);}
+  .ip-add-btn{background:var(--green-700);color:#fff;border:none;border-radius:8px;padding:6px 8px;font-size:11.5px;font-weight:700;cursor:pointer;width:100%;}
+  .ip-add-btn:hover{background:var(--green-800);}
+  .ip-add-btn:disabled{background:#cbd5e1;cursor:not-allowed;}
+  .ip-stepper{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+  .ip-stepper button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:#f1f5f9;font-size:15px;font-weight:700;cursor:pointer;color:var(--ink);flex-shrink:0;}
+  .ip-stepper button:disabled{opacity:.4;cursor:not-allowed;}
+  .ip-stepper span{min-width:18px;text-align:center;font-weight:700;font-size:13px;}
+  .ip-selected{display:flex;flex-direction:column;gap:8px;}
+  .ip-selected-row{display:flex;align-items:center;justify-content:space-between;background:var(--green-100);border-radius:9px;padding:9px 12px;gap:10px;}
+  .ip-selected-info{display:flex;flex-direction:column;font-size:12.5px;}
+  .ip-selected-info span{color:var(--muted);font-size:11.5px;}
+  .ip-remove-btn{background:transparent;border:none;color:var(--red-600);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0;padding:6px;}
+  .ip-empty{color:var(--muted);font-size:12.5px;margin:0;padding:14px;text-align:center;grid-column:1/-1;}
+
+  .action-btns{display:flex;gap:6px;flex-wrap:wrap;}
+  .btn-xs{padding:7px 11px;font-size:11.5px;border-radius:7px;}
+
+  .placeholder{padding:60px 20px;text-align:center;color:var(--muted);}
+  .placeholder svg{width:52px;height:52px;color:#c3cad6;margin-bottom:14px;}
+  .placeholder h3{color:var(--ink);margin:0 0 8px;}
+
+  .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:#0f9d58;color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:999;max-width:92vw;text-align:right;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast svg{width:18px;height:18px;flex-shrink:0;}
+
+  .footer-note{text-align:center;font-size:11.5px;color:var(--muted);padding:18px 0 4px;}
+
+  /* ===== Modal ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:300;padding:16px;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;border-radius:16px 16px 0 0;z-index:2;}
+  .modal-header h3{margin:0;font-size:16px;font-weight:800;}
+  .modal-close{background:transparent;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px;}
+  .modal-body{padding:18px 20px 22px;}
+
+  @media (max-width:900px){
+    .sidebar{position:fixed;left:0;top:0;z-index:150;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 30px rgba(0,0,0,.15);}
+    .sidebar.open{transform:translateX(0);}
+    .content{padding:18px 16px 40px;}
+    .topbar{padding:14px 16px;}
+    .topbar-logo{display:block;}
+  }
+  @media (max-width:600px){
+    .form-actions{flex-direction:column;}
+    .form-actions button{width:100%;}
+    .search-row{flex-direction:column;}
+    .search-row input, .search-row select, .search-row button{width:100%;flex:none;}
+    .user-chip .u-role{display:none;}
+    .quick-grid{grid-template-columns:repeat(2,1fr);}
+    .card-head{flex-direction:column;align-items:flex-start;}
+    table.data-table{font-size:12px;}
+    .action-btns{width:100%;}
+    .action-btns button{flex:1;min-width:70px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span id="toastText">บันทึกสำเร็จ</span></div>
+
+<div class="conn-banner demo" id="connBanner">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8h.01M11 12h1v5h1"/></svg>
+  <span id="connText">กำลังเชื่อมต่อฐานข้อมูล Google Sheet...</span>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">
+        <img class="app-logo-img" alt="ตราสัญลักษณ์มหาวิทยาลัยราชภัฏหมู่บ้านจอมบึง">
+      </div>
+      <div>
+        <h1>ระบบยืม-คืน<br>อุปกรณ์วิทยาศาสตร์</h1>
+        <p>ห้องปฏิบัติการทางสัตวศาสตร์<br>มหาวิทยาลัยราชภัฏหมู่บ้านจอมบึง</p>
+      </div>
+    </div>
+
+    <div class="sb-nav" id="sbNav">
+      <button class="active" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>หน้าหลัก</button>
+      <button data-view="borrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>ยืมอุปกรณ์ (จองหลายรายการ)</button>
+      <button data-view="return"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 0 1 0 10h-1"/></svg>คืนอุปกรณ์</button>
+      <button data-view="approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7l7-4z"/></svg>อนุมัติการจอง<span class="nav-badge" id="approvalsNavBadge" style="display:none;">0</span></button>
+      <button data-view="allBorrows"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5"/></svg>รายการยืมทั้งหมด</button>
+      <button data-view="equipment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>อุปกรณ์ทั้งหมด</button>
+      <button data-view="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path stroke-linecap="round" d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6M17 8a3 3 0 1 1 0-6M22 20c0-2.7-2-4.8-4.5-5.6"/></svg>ผู้ใช้งาน</button>
+      <button data-view="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 20V10M12 20V4M20 20v-7"/></svg>รายงาน</button>
+      <div class="sb-divider"></div>
+      <button data-view="dueAlerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path stroke-linecap="round" d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>แจ้งเตือนวันคืน</button>
+      <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V19a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.5V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.5 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>ตั้งค่า</button>
+      <button data-view="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>ออกจากระบบ</button>
+    </div>
+
+    <div class="sb-illust">
+      <div class="emoji-row">🔬🧪🐄</div>
+      <h3>ห้องปฏิบัติการทางสัตวศาสตร์</h3>
+      <p>คณะวิทยาศาสตร์และเทคโนโลยี<br>มหาวิทยาลัยราชภัฏหมู่บ้านจอมบึง</p>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburgerBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <img class="app-logo-img topbar-logo" alt="ตราสัญลักษณ์มหาวิทยาลัยราชภัฏหมู่บ้านจอมบึง">
+        <h2 class="page-title" id="pageTitle">หน้าหลัก</h2>
+      </div>
+      <div class="topbar-right">
+        <button class="bell-btn" id="bellBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path stroke-linecap="round" d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="bell-badge" id="bellBadge">0</span>
+        </button>
+        <div class="user-chip">
+          <div class="avatar">ศ</div>
+          <div>
+            <div class="u-name">ศศิธร สายแก้ว</div>
+            <div class="u-role">เจ้าหน้าที่</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- HOME -->
+      <div class="view active" id="view-home">
+        <div class="greeting">ยินดีต้อนรับ, <b>ศศิธร สายแก้ว</b> (เจ้าหน้าที่)</div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6M10 2v5.5L4.5 18a2 2 0 0 0 1.8 2.9h11.4a2 2 0 0 0 1.8-2.9L14 7.5V2"/></svg></div>
+            <div><div class="stat-label">อุปกรณ์ทั้งหมด</div><div class="stat-value" id="statTotal">- <span>รายการ</span></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="17" rx="2"/><path stroke-linecap="round" d="M9 2h6v3H9zM8 11h8M8 15h5"/></svg></div>
+            <div><div class="stat-label">กำลังถูกยืม</div><div class="stat-value" id="statBorrowing">- <span>รายการ</span></div><div class="stat-sub" id="statBorrowingPct">คิดเป็น -%</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7l7-4z"/></svg></div>
+            <div><div class="stat-label">รอการอนุมัติ</div><div class="stat-value" id="statPending">- <span>รายการ</span></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg></div>
+            <div><div class="stat-label">ใกล้ถึงกำหนดคืน</div><div class="stat-value" id="statDueSoon">- <span>รายการ</span></div><div class="stat-sub">ภายใน 3 วัน</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16h.01"/></svg></div>
+            <div><div class="stat-label">เกินกำหนดคืน</div><div class="stat-value" id="statOverdue">- <span>รายการ</span></div></div>
+            <div class="stat-dot" id="overdueDot" style="display:none;"></div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>รายการยืมล่าสุด</h3><button class="link-btn" data-view="allBorrows">ดูทั้งหมด</button></div>
+            <div class="card-body">
+              <div style="overflow-x:auto;">
+                <table class="data-table">
+                  <thead><tr><th>รหัสการยืม</th><th>ผู้ยืม</th><th>รายการอุปกรณ์</th><th>วันที่ยืม</th><th>กำหนดคืน</th><th>สถานะ</th></tr></thead>
+                  <tbody id="recentBorrowsBody"></tbody>
+                </table>
+              </div>
+              <div class="btn-plain-center">
+                <button class="btn-outline-full" data-view="allBorrows">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="4" y="4" width="16" height="16" rx="2"/><path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5"/></svg>
+                  ดูรายการยืมทั้งหมด
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:20px;">
+              <div class="card-head"><h3>แจ้งเตือนวันคืน</h3><button class="link-btn" data-view="dueAlerts">ดูทั้งหมด</button></div>
+              <div class="card-body" id="reminderList"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>เมนูด่วน</h3></div>
+              <div class="card-body">
+                <div class="quick-grid">
+                  <button class="quick-item qi-green" data-view="borrow"><div class="qi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></div>ยืมอุปกรณ์</button>
+                  <button class="quick-item qi-blue" data-view="return"><div class="qi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 0 1 0 10h-1"/></svg></div>คืนอุปกรณ์</button>
+                  <button class="quick-item qi-indigo" data-view="approvals"><div class="qi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7l7-4z"/></svg></div>อนุมัติการจอง</button>
+                  <button class="quick-item qi-amber" data-view="allBorrows"><div class="qi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5"/></svg></div>รายการยืม</button>
+                  <button class="quick-item qi-purple" data-view="equipment"><div class="qi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg></div>อุปกรณ์ทั้งหมด</button>
+                  <button class="quick-item qi-teal" data-view="dueAlerts"><div class="qi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div>แจ้งเตือนวันคืน</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BORROW FORM -->
+      <div class="view" id="view-borrow">
+        <div class="card">
+          <div class="card-head"><h3>แบบฟอร์มยืมอุปกรณ์ (จองอุปกรณ์ได้หลายรายการต่อครั้ง)</h3></div>
+          <div class="card-body">
+            <form id="borrowForm" novalidate>
+              <div class="form-grid">
+                <div class="field">
+                  <label>ชื่อ-นามสกุลผู้ยืม <span class="req">*</span></label>
+                  <input type="text" id="b_name" placeholder="กรอกชื่อ-นามสกุล" required>
+                  <div class="err-msg">กรุณากรอกชื่อ-นามสกุล</div>
+                </div>
+                <div class="field">
+                  <label>รหัสนักศึกษา/บุคลากร <span class="req">*</span></label>
+                  <input type="text" id="b_studentId" placeholder="กรอกรหัส" required>
+                  <div class="err-msg">กรุณากรอกรหัสนักศึกษา/บุคลากร</div>
+                </div>
+                <div class="field">
+                  <label>เบอร์โทรศัพท์ <span class="req">*</span></label>
+                  <input type="tel" id="b_phone" placeholder="กรอกเบอร์โทรศัพท์" required>
+                  <div class="err-msg">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</div>
+                </div>
+                <div class="field">
+                  <label>วันที่ยืม <span class="req">*</span></label>
+                  <input type="date" id="b_borrowDate" required>
+                  <div class="err-msg">กรุณาระบุวันที่ยืม</div>
+                </div>
+                <div class="field">
+                  <label>กำหนดคืน <span class="req">*</span></label>
+                  <input type="date" id="b_dueDate" required>
+                  <div class="err-msg">กำหนดคืนต้องอยู่หลังวันที่ยืม</div>
+                </div>
+                <div class="field">
+                  <label class="checkbox-row"><input type="checkbox" id="b_immediateApprove" checked> อนุมัติทันที (เจ้าหน้าที่ดำเนินการเอง ไม่ต้องรออนุมัติ)</label>
+                </div>
+                <div class="field full">
+                  <label>เลือกอุปกรณ์ที่ต้องการยืม (เลือกได้หลายรายการ) <span class="req">*</span></label>
+                  <input type="text" class="ip-search" data-prefix="bform" placeholder="ค้นหาอุปกรณ์ด้วยชื่อหรือหมวดหมู่...">
+                  <div class="ip-grid" id="bform_ipGrid"></div>
+                  <div class="err-msg" id="bform_ipErr">กรุณาเลือกอุปกรณ์อย่างน้อย 1 รายการ</div>
+                </div>
+                <div class="field full">
+                  <label>รายการที่เลือก</label>
+                  <div class="ip-selected" id="bform_ipSelected"><p class="ip-empty">ยังไม่ได้เลือกอุปกรณ์</p></div>
+                </div>
+                <div class="field full">
+                  <label>หมายเหตุ</label>
+                  <input type="text" id="b_note" placeholder="เช่น ใช้สำหรับวิชา / โครงการ">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary" id="borrowSubmitBtn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                  บันทึกการยืม
+                </button>
+                <button type="button" class="btn-secondary" id="borrowResetBtn">ล้างข้อมูล</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- RETURN FORM -->
+      <div class="view" id="view-return">
+        <div class="card">
+          <div class="card-head"><h3>คืนอุปกรณ์</h3></div>
+          <div class="card-body">
+            <div class="search-row">
+              <input type="text" id="returnSearchInput" placeholder="ค้นหาด้วยรหัสการยืม, ชื่อผู้ยืม หรือรหัสนักศึกษา">
+              <button class="btn-primary" style="flex:none;" id="returnSearchBtn">ค้นหา</button>
+            </div>
+            <div id="returnBody">
+              <div class="placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 0 1 0 10h-1"/></svg>
+                <h3>ค้นหารายการที่ต้องการคืน</h3><p>พิมพ์รหัสการยืมหรือชื่อผู้ยืม แล้วกด "ค้นหา"</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVALS -->
+      <div class="view" id="view-approvals">
+        <div class="card">
+          <div class="card-head"><h3>รายการรอการอนุมัติ (จำเป็นต้องเข้าสู่ระบบเจ้าหน้าที่ในเมนู "ตั้งค่า")</h3></div>
+          <div class="card-body" id="approvalsBody"></div>
+        </div>
+      </div>
+
+      <!-- ALL BORROWS -->
+      <div class="view" id="view-allBorrows">
+        <div class="card">
+          <div class="card-head"><h3>รายการยืมทั้งหมด</h3></div>
+          <div class="card-body">
+            <div class="search-row">
+              <input type="text" id="allSearchInput" placeholder="ค้นหาด้วยชื่อผู้ยืม, รหัส หรืออุปกรณ์">
+              <select id="allStatusFilter">
+                <option value="">สถานะทั้งหมด</option>
+                <option value="รอการอนุมัติ">รอการอนุมัติ</option>
+                <option value="กำลังยืม">กำลังยืม</option>
+                <option value="คืนแล้ว">คืนแล้ว</option>
+                <option value="ยกเลิก">ยกเลิก</option>
+              </select>
+              <button class="btn-secondary" id="allFilterBtn" style="flex:none;">กรอง</button>
+            </div>
+            <div style="overflow-x:auto;"><table class="data-table" id="allBorrowsTable">
+              <thead><tr><th>รหัสการยืม</th><th>ผู้ยืม</th><th>รายการอุปกรณ์</th><th>วันที่ยืม</th><th>กำหนดคืน</th><th>วันคืนจริง</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody id="allBorrowsBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EQUIPMENT -->
+      <div class="view" id="view-equipment">
+        <div class="card">
+          <div class="card-head"><h3>อุปกรณ์ทั้งหมด</h3></div>
+          <div class="card-body">
+            <div class="search-row"><input type="text" id="equipSearchInput" placeholder="ค้นหาชื่ออุปกรณ์หรือหมวดหมู่"></div>
+            <div class="equip-grid" id="equipGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="view" id="view-users">
+        <div class="card">
+          <div class="card-head"><h3>ผู้ใช้งาน (ผู้เคยยืมอุปกรณ์)</h3></div>
+          <div class="card-body">
+            <div style="overflow-x:auto;"><table class="data-table">
+              <thead><tr><th>ชื่อ-นามสกุล</th><th>รหัสนักศึกษา/บุคลากร</th><th>เบอร์โทรศัพท์</th><th>จำนวนครั้งที่ยืม</th><th>กำลังยืมอยู่</th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="view" id="view-reports">
+        <div class="stat-grid" id="reportStatGrid"></div>
+        <div class="card">
+          <div class="card-head"><h3>อุปกรณ์ที่ถูกยืมบ่อยที่สุด</h3></div>
+          <div class="card-body" id="reportTopEquipment"></div>
+        </div>
+      </div>
+
+      <!-- DUE ALERTS -->
+      <div class="view" id="view-dueAlerts">
+        <div class="card">
+          <div class="card-head"><h3>แจ้งเตือนวันคืน (ใกล้ถึงกำหนด / เกินกำหนด)</h3></div>
+          <div class="card-body" id="dueAlertsFull"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="view" id="view-settings">
+        <div class="card">
+          <div class="card-head"><h3>ตั้งค่า / เพิ่มอุปกรณ์ใหม่</h3></div>
+          <div class="card-body">
+            <div id="settingsLoginBox">
+              <p style="font-size:13.5px;color:#334155;margin:0 0 12px;">ต้องกรอกรหัสผ่านเจ้าหน้าที่เพื่อจัดการอุปกรณ์ และเพื่ออนุมัติ/แก้ไข/ยกเลิกการจอง</p>
+              <div class="search-row">
+                <input type="password" id="settingsPasscodeInput" placeholder="กรอกรหัสผ่านเจ้าหน้าที่">
+                <button class="btn-primary" style="flex:none;" id="settingsLoginBtn">เข้าสู่ระบบ</button>
+              </div>
+              <p style="font-size:11.5px;color:var(--muted);margin:8px 0 0;">โหมดสาธิต: รหัสผ่านคือ demo1234</p>
+            </div>
+            <div id="settingsPanel" style="display:none;">
+              <p style="font-size:13px;color:var(--green-700);font-weight:700;margin:0 0 14px;">✓ เข้าสู่ระบบเจ้าหน้าที่แล้ว — สามารถอนุมัติ/แก้ไข/ยกเลิกการจอง และเพิ่มอุปกรณ์ได้</p>
+              <form id="addEquipForm" novalidate>
+                <div class="form-grid">
+                  <div class="field"><label>ชื่ออุปกรณ์ <span class="req">*</span></label><input type="text" id="ae_name" required></div>
+                  <div class="field"><label>หมวดหมู่ <span class="req">*</span></label><input type="text" id="ae_category" required></div>
+                  <div class="field"><label>จำนวนทั้งหมด <span class="req">*</span></label><input type="number" id="ae_qty" min="1" value="1" required></div>
+                  <div class="field"><label>ลิงก์รูปภาพอุปกรณ์ (ถ้ามี)</label><input type="text" id="ae_image" placeholder="https://..."></div>
+                  <div class="field"><label>หรืออัปโหลดรูปจากเครื่อง</label><input type="file" id="ae_imageFile" accept="image/*"></div>
+                  <div class="field"><label>ตัวอย่างรูป</label><div class="eq-thumb" id="ae_imagePreview" style="width:90px;height:90px;"></div></div>
+                </div>
+                <div class="form-actions"><button type="submit" class="btn-primary">เพิ่มอุปกรณ์</button></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="footer-note" id="footerNote">© 2024 ห้องปฏิบัติการทางสัตวศาสตร์ มหาวิทยาลัยราชภัฏหมู่บ้านจอมบึง | พัฒนาระบบโดย งานวิทยาศาสตร์และห้องปฏิบัติการ · เวอร์ชัน 2.0.0</div>
+  </div>
+</div>
+
+<!-- EDIT BOOKING MODAL -->
+<div class="modal-overlay" id="editModalOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>แก้ไขรายการจอง</h3>
+      <button type="button" class="modal-close" id="editModalCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="editBookingForm" novalidate>
+        <input type="hidden" id="edit_id">
+        <div class="form-grid">
+          <div class="field">
+            <label>ชื่อ-นามสกุลผู้ยืม <span class="req">*</span></label>
+            <input type="text" id="edit_name" required>
+            <div class="err-msg">กรุณากรอกชื่อ-นามสกุล</div>
+          </div>
+          <div class="field">
+            <label>รหัสนักศึกษา/บุคลากร <span class="req">*</span></label>
+            <input type="text" id="edit_studentId" required>
+            <div class="err-msg">กรุณากรอกรหัสนักศึกษา/บุคลากร</div>
+          </div>
+          <div class="field">
+            <label>เบอร์โทรศัพท์ <span class="req">*</span></label>
+            <input type="tel" id="edit_phone" required>
+            <div class="err-msg">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</div>
+          </div>
+          <div class="field">
+            <label>วันที่ยืม <span class="req">*</span></label>
+            <input type="date" id="edit_borrowDate" required>
+          </div>
+          <div class="field">
+            <label>กำหนดคืน <span class="req">*</span></label>
+            <input type="date" id="edit_dueDate" required>
+            <div class="err-msg">กำหนดคืนต้องอยู่หลังวันที่ยืม</div>
+          </div>
+          <div class="field full">
+            <label>เลือกอุปกรณ์ (เลือกได้หลายรายการ) <span class="req">*</span></label>
+            <input type="text" class="ip-search" data-prefix="edit" placeholder="ค้นหาอุปกรณ์...">
+            <div class="ip-grid" id="edit_ipGrid"></div>
+            <div class="err-msg" id="edit_ipErr">กรุณาเลือกอุปกรณ์อย่างน้อย 1 รายการ</div>
+          </div>
+          <div class="field full">
+            <label>รายการที่เลือก</label>
+            <div class="ip-selected" id="edit_ipSelected"></div>
+          </div>
+          <div class="field full">
+            <label>หมายเหตุ</label>
+            <input type="text" id="edit_note">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="editSubmitBtn">บันทึกการแก้ไข</button>
+          <button type="button" class="btn-secondary" id="editCancelBtn">ยกเลิก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   ตั้งค่าการเชื่อมต่อ Google Sheet
+   นำ "Web app URL" ที่ได้จากการ Deploy Google Apps Script (ไฟล์ Code.gs)
+   มาวางแทนที่ '' ด้านล่างนี้
+   ========================================================================= */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhUeramc2q-NzUo2tHRutT-i-0-8ilhVoVlXP-VUxMCtfjbLBEzEK_G-ufOjJcDzbz_A/exec';
+let DEMO_MODE = !SCRIPT_URL;
+const DEMO_ADMIN_PASSCODE = 'Sasithorn110330';
+
+/* โลโก้มหาวิทยาลัยราชภัฏหมู่บ้านจอมบึง (ฝังเป็น Base64 เพื่อให้ไฟล์ทำงานได้โดยไม่ต้องพึ่งอินเทอร์เน็ต) */
+const LOGO_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAFCCAMAAAA667PHAAAA/1BMVEVnWlsiIiWXYVTd2d5WMzSkn6eulmlZLFeIdp40HlXFuc64scmFO1BoWzxlVIjGgV/VyaiIRj3Ps5I8SEJ6gnl9hYC9wL2EPDy+wsDGe2BVP4DZwH/+/v4LGhEoDlAuEFQQIhbLqHKyl2ayV00yNySLeFDRs3hMSC/KmGpzZ0QmKRuXhVfEd1vJiGLq6O1WVTaTRkq7ZFKliVxmWTtKGFDNx9ayqcR0NkyUh6xTJkummLh2ZpPBa1U5QyxqV4lQN3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABGJNGIAAAAQHRSTlP/////////////////////////////////////////////////////////////////////////////////////73leyQAASbBJREFUeNrtfQljotqy7gIR1EQz7OGc+16UQZYIqCg4j///X70a1gLSO327k5je+5wnPSXpDPJRq+qrWbzcLrrEDYIbEDcgbkDcgLgBcQPiBsQNiBsQNyBuQNyAuAFxA+IGxA2IGxA3IG5A3IC4AXED4gbEDYgbEDcgbkDcgLgBcQPiBsQNiBsQNyBuQNyAuF03IG5A3IC4AXED4gbEDYgbEDcgbkDcgLgBcQPiBsR/IRCzxuPjczOwpYjjWMjUtpvPj43G7P8jIAACQEBmURQaXnn14U94yoTdfPxb0RC/DISmLYooTLz+d64kzGK72Wj8FwOBIMRR6H2LgRdFSVYk9Y8AGM1m478TiAaiYLwlCGGeyyAwk2/gCeGYNP7bgGg82mn0vdMQpr4vX4sEQ+GdRHM1+y8CAoUh/K5S6HuZ6Cb9N//fM8Tvzdl/CRCPQXz69khESjySxEvgqv2v961gwBH5lVB8GRCNIAvf0Aox32ScxzKQRVFE9GGra0ozSr7FwhDN/3QgGs9x+IaFNAOL34p93w+CwB9n+F5hj/H9XIZ/0Rbiz/9kIBrP8vTNmUgKsyjiIE8MFo1gJBND+CkJQTGyizCzH3Oj/xee4YnGfyoQs0c7+4sGzOCJ+2kaROqMBD7IQhSYfVSWmS89I7RHRT8yzb9IUvhLjOn1gWjYwqib876HiiCS3XiUZmleEEanCgi4uj6ojpPvh/0MeIVIjG+F4hdoTXH9U/HqkSZWV9oFnvZ+aAdG5uf030Y6hg9GtmTViUBkowBsaZT60gijOPrVQiGuLQ6vT0UY53ngF/xg01FkBDbfYuqjmASkIxKJn5GNUs8AtPw4yoPgG73pfbn9uC4Qj3b9SYZJP5NFVICKZFMxMhOJkgA3HAeRAUCgegytFM9JNkLxyGw/B9c8TeU3hPSrheKaQDSar2ymJSNgCOBn09NHNuXnRuyDWghlRkJQ+H5kRKYMWCJMsqujoJsF4yCFr0nioi4Uf/6HAPFovxJnK0/V+9nY9NhK+nDPeWiEuS1zmXixbWegH1OZxh5AUKDu8FM4XNInah4GQcHfw4pAqH5r/kcA8SjqxDCJc8nK3+sneYC34+WjPE0F6sFTFobglochUHDvFMIb/b4EDdIvQDnAFwSMKThffh6RtQX48HjM/vlAPMbeKy49yqNEAdHvBijiRh4neONe3bZWFxwgAwQCvXJJ6gL/W45ArMLkFEiPOXfjHw7ErPnaWsApSNNca85TgETKq7NNBQf+HRUZ6NTMB4kI4zSFkzPyM+WjgS1FTRGe9Kn7MiSuA0TDrh8LkOJIZqfYLnlk+v2gBNxttxtLCWYW7ckpSwDFIFQG18c34roxFat/MBCvcDAKWdADB54k+eNhEb52pRLgTHBl8MeyohD88VMURqGSkTCOk34SWWBeY6YZsvb9v0hliqvgYPR1fCUJs9xnI4FK36qfA/UJUQE+dx6MweOEP0EOXqfIolehSw/JliwCsjuZjf9YJUM5Nf+hQJC5CJkUhzKPMjuwDAQmQbpcv78kLKQMAALwwIM8T2We5rkNzrg/DnKziOrRrDAFLz0GfRnmcMKMJK+42pcYD3ENc+GFkcwzDEvnOXCqKCdRBqaUirAKOEWFzAkBKeCyrLZhtNtGKEQkJP9PYNYE4xSLFL9PHKA9MropmZ6kAG3zFUiIz8sDCC/cBig5OM0jtH5eHHSVjvPKyD0cBn+ci8hyAIDBN5dhWICNzMeBFKU+8bwsNSP4LiRV8L1zCySDPPkvQEJcAQdwIkaszk7wMhNQezm92uyk9UJkBqMxSIK1G7TVvbvqL7dEwzUsMw183y7j2mhPAmV6Yh9YpofHrQAf5vp64pNANIhOngJ4WMgOUT9KM+xn/rhbqYYi9X141CAIhrXBe+f7p3/4bZdh2SwNK7bhk02L3fPU8DI+XcUI/XcwP6BB8+ILNObngGhIdf5DL5Jo6owYqaBBkTjtc6QjvDODRMEyAQkFAt17KRPw9xxRMtoi9UdjABhc1DxMQgqEF2OiFlFuhlnRRVJybSsqPmc3PWU3Q3jx5DSFdm55YSwzpR4yOfbNiLQCPX3L3FWqwa39PXDv5y6/bQjpj/CxF3GYI7f2ovEoUzHfWPPyKzOrzwAxs7UuTHI/SPk0F4ENvqVSeCHcUVBY+n4BCWOub/cVCnBthhVEbYACTEgcxzaajMj2yZOJbPDOy0Deddn2Z4BolrauCOIwTEeIBPhNmhF7WeAHsWPslloPwB/LdPg9tzwbBMduOK/JievAARnLOBWe0sGIQ5CDRxNJrUzF7J8BxPOpZDgy8xIzAHmGxxXr2BKIgw8qEp71vdYKLBJLrSUul+qUzGsCMRgsdwMjDvw8VtH/PE2MiEUOHDOlf7w/Zv8EIB6zigXCgyqAEttAIzztKEZgK+I2PmBj7tQOQXfoKClwt83yZIBAuDXlsYGvMOA7ED1B+2GbETAqTwmaIplG8x8ARCOup2yTIgdHKQJSnLBjkQABkEJJgQVCUCqEDd0yvnm5W1302bgfbuhT+d0df4EDMsVVAx4QS1+wpIFN0iYpbP7tQDREFbCn2wabAURbB7HhWNiirc886IWKOmyGQ4ffOjdmZ4XO0lQng2GZs5EFpZkGHNXwQhmwCBrg1erM4RVNx0eBKA2GF+cUf/Al+BtdpR6iYBQ4FXNkU8FAwLMfqtvszV72rtKNhE55MOAdl//HQEaZcGaADwR45XZR+nJXMx3ik4rSK/yRxHyEBPuZa/UQjHKBhkHLwXxYng14W6uD7eylqYxEiQ59yXC4LK1rW444L+IhszKQsdRzHldTE+JzCiKU4FeP0C06BUF8UtgE4H63XdctbeMGb5MplTufHJWS6N2tztpmLBZzV1tTZ6i5BiEBLEooFuUlgHFMAhKxnHjX4tofAqKhD0ZSoNdtP8rESOJKPQRiUNN8yCe1ELjubjhd6INy7mmzOp9MzKXmEPO6dMAHBOhJBiKSgdIUnlT5s2sdjg8B0TR0UA11gneywbPwVHFMYjIO+mTQP5ZpLvX5NzUQ7nndbLkKiOm0PD1wMjavvXTLVq5LEqc6PJPpEgPv99nfBcSj0AmLgp8KIqFfYOyPxVLrBnUBSyDrSNbzYbq4ZyCas5eOEpT5w3ihPwM+effaGxkI+AGkGJJMqUmgW0FxTRsqPmM5gevxSS18kliP3hLGzlEWgv8wEPqWpw9DZVDOzfVZP3OWE+V0vCKZ9FVCu7OKpWRpIMuM+VUOxweAaFZxWhnYpLpCUSjRtfFcGPe1sAPd51DRycFy+IDaAP9LXMT5suQPW4uHo1kB4WjLq9DbtUXNsU9QVXSrAtarWI73A9HQ1DpOrSRDLgkchxWEF49YP1hD5V5oMaCHjMg4CzIa8NZh1YFrf2HKNZxOlJJAIO5fO+gbwFV7oMzeVJ5EhTivcTjeD4RdngtiUmDWy+riAgwdv3yLJUAHoOYLDcT9ccpAuK3VqtFodAR9eDkEbclyUANCOWD39K6wla8BelIxia5WE1fwQ98NxHPIB9WjooYkOWH5bFLHwSUfk54vyYQLt7kYLhV5nrDRQEdbnOFSkmMCECxFwCsX81ow073HWI5LVlRXnEiWjNEoVfyi+cuBmAmVsQwD34yyroFv8JMCjhlrq8mHQ3PLDQKhVQQZDXzC2+Z2u22xGCyHk/FRAeEsjvzZrjopipEPhK/cTmFbIIs5eOk65B02fjUQzSpPAUcVRNMwZEbQWMHINMqAi2EyEvTOHJ4x0yWgU9MjE+jDatVZrfYOHw1z6h/VF5RAMHTmXL/TNlUFVuSnFtHXimqLXwxEo0bzPYwgJkCyPeULyXaND1roMGhn8sisGg7JfDJmreicD63DoaUkYjccj5WkABALc6lJ6ZJpJuMLfgedQi/GkppX+fdPW453AiHqWX10KgLO+CORkjvFI5W6LFUeALHYuNrTGD+QrDRBUzZWjVnnMuAPT5leoNQcSaPQvd8P58vS8Ri0U+WAcUEJ/FyqMcGf/1l9+T4gmob2OblaKspHfqxsiC+qAD1zKHajKokgQVmMx0f0stf6ex7I756CoDCQqC8WjsYQv4tbxf+dIMD4vhGmpQlRnPazIvEuIMDpZEMJiirFmIAX2ZIaDQAHuXOVRNArByBMRbXhzo4bHawCZQBqEazn3d1d566zWvdQH4JALEx1vzsAYlORq3lph/FSpQZebEvNKtgb/Sy/FB8RiDCVMehsYJMUofSwUkjuKFhdnmcCYqA0JD1i/g9rMQ3gPi/NZnO/38Mf8LvmiwAEYjPQEE5KRasPmI5s4OGg4B3nExOsUZTWNURCvE8gNBAZx6h18joe2c7A2WiRYNeJTSZFIyaLnXZEjbkQ1mDQW6/3gEUT/rkMLCEWyiurgKDbByb2ily5LvrkVdRYxmFXRzA/JxLvAaJZlbRk5P+N2K4bCSkIa1Mjk6zyFBALOP9udS8Dt+1ezuce8in4+4Jf8HRfRjUBCMXCSc3e1zPF7tKNR2OrRKIb5IGfX0NLvAOI0uvMpIyxOq6wuZIS7Cie7918p29VAbFTOZ2jBkK5EIdOBzTEeo3ysL9rNrfOwHK11450ezJX784X2t4oHHZwOEamLkQD58YP4ii8ghcq3isQmNX1fSL5XhapQlK7TTZQRxQ0ECqBAf7FYqekhZTp9pvvvBKDmiwRECxMBETdDd0A1lYwJhE4FZYJMFS1ep8SCfEugcDOXdCURTBS+QY6KMGIXa2NtpFMpo86AAMkYeGU6U+3Zjr1tz7Xwxc78kTb7Iuhmq38+SUJnfCpuDtBL0flmo1Pi4R4h0B4Kr1SgM85UgWlHpaH2qzjd/NlmZlw8aRj4AGBmBIQbqn7W6sGuZ50zeDXuYpmMQ0fLpXpISBKq7EhIAw5IrXdHcUq9RUbxmdF4qeBmJWkEpvWUFP67GNE6HOql70pXUbwESaTIUeqUCI2bi2KeSE1eT7ghX+fHR3LIjwXvgpgwqGaaC+Wmdl93ftKiGQnUXhKVSLhE/Typ4F4DKmSqyyZDaUd0cEAw67uUaUv1AO0yhDME/gX8yqGCToC1WRzvwbriUxie3Cr8hnwzyc+3T5JlQpuK0tkMtJtyQ6Xx0XfEZxOPqmfiND8NBBNqngs+llRy/yS8523+XQj/dmUGS0gDJMpigRYDQRiWSMDzVV50elYX0qQUAwACL79+8X0OK/V1my4ygS+Y6CKlBMrDrDQKFOhio+LhHiHqkwkEH0sF+uXddSosUQp1NbQdHX+30UOeSSWbR3HdOhdTTwv5cFAD7TXO+ukB8vV1GcBcoZ4uir6sZyXGfNYiUSRB1IEZt/gpqj+qfHVQGDEtptn6FQEslYNWfiy4pOuqSNynMyYTikOYYH2AyXBt3nY8oVHornl4EyrdTgLrSSWQ98nOdiZEyUQLHBuFaIZOPm44ORBGoZp3E9s1djQ/GogBNbCSPiTYoJaFlainE5bDNzygM8X1Qt3WRLmZAbGnNRxB5fOTF0vs9rVaHT08diYozHe8XJ+xDimzhtiOK8WrxHYBYWmG/i1kVgSM7CfOhs/CcQjqkVZ9Is09IxM5orWEqd0XU0QKBpTFQ1a5Fw7rmU+jCcmy8ql892zpzXudET3j6758V4zE9dVhRVKJNo5aQkPAxRGYftBqvpmml8LhMAYyCnpZ/TTwWQwuQ7zsRiU4RiK2Za1YvjeBFxueIz/QtG4Z7wOrRachj1w67W+gGzf3W13jJ8znKLRQAXhTxeOtsauSomWRD3m5pbMts3c99Oyjlt8KRCN8Jt+k5ipDAiE45a+AIvEpqqptRZjuJkNiobPrvWgfUActnfrPd4/XuCOb0FrKh2xRPDgHIHlBBBNt6TXWDmwG1Q1mo5NvpcX5X4gat0gHw3jip+2nfVmg1BmqrFZWE4FBJ4GRoKVxHL+4KMFsOiu6Lxv3zrDqCRWhwHhsBiPJvAtNvDvVIcrWVKGc7eePQPDwc1/6es+9OYXAjETHMGPdNjY4EcQj9K2sSlfLb7KpyGpCVUTYE380XjuwhlB0bhvDwat1QodTyJUdDg6nQ6SidkMa0aWc5AdH08TCAYbUSVeS3PIZTRVAWLgW/h6TrpmRb28D6rLnwJipaoTcjiKtQYTjlNiorNkyOBvLBamo4NKcDbABCzpX38skEH0gEEwjVA8mxlFr4VnA+TA99HSLIfwhWhy1TdalnU2Corl0pXsjnvaJZcBeQHGn18HRFMpBtv3bRPUkppt0PXJ/eYqkMplmhyH9yoKbdED3pDaBJcE03yYzFCUkt+463RAYey3+70YCMCL+LWz8P2yYgItyFClyNUpXG6W4HGoxtqEFKUXK579+5cBofytKMiFjYYqjiPldjKH0FktfnhPR/CiVRkdATG5xzfgCTvunf6O9PsveLuOP0LtCqZyMkKerVTPZng8liFNkod71Ezpo6nKlxKDSvo4Zvexs/EzQDS5ZQu8G++UCTRWoWrZUibvfuiU0YSBhTmcBQdllgTEnD7o+467XWFgCkwnXxi37KCaIJdjtncdm+6fyAQZUb5roNqLuVsBsWQvVHA3IHg7kVWkeR6o19X8MiA8lctIMDJzkkGsamOE5nxzsgjqcKAYTDk8RfdPNwQiMb64vVaPzae+Wts98Qr66wwKcDTGyD8DyJ4XiMMDOC27SnG6c3bhgFRFXKmdByCn2enEtSR/fBEQeDLIaMBRJMcXI+k0DmKn40pMH/ThQCTGxBtQNxBPHBjWYuE6a1YOaC4Vs+ZrhXqieUBLgNEczACCRODtupjzAEwst7SdSy7bdpFUmVRYF/hpFnqlef9QoOongPgzVBm+MmSqIpVm5W5ZVZ0k3PS/0FggEi4CgUlNRMIYHH5gnISLYX1Ujkf4MjhSeCxQNlR1mcv5Yv0e5r04ZpcrXpl8/GyIn1ERHlcSWq+Ii6RIJReC4AMfVmXGFtAiItfuEwBBZ4ME+7wmFXHXoYtsB/2GP5gHXYmBYRC0JuIHnifQySmpT00e0Cetla/H5IMmKg/dt1Jyzo2vAWLGteDAInMwnWESMpWA951a3RxWB1XhOEvdyfIeiQEHYHtKOzZZT+73QLPv1vQWZbzAfrZ6jg7f+kQjHJaHqha1lkDD9wUnALuBZXhGFIOGiYhszr4CiJWqp81kEBTYtSipu1WUJ0MbiyEnrpXCRC453CBTBiWBp/1VDH+mqXXdE2/MGk2Hg/jEq3ZLwBPkYb5THi5RT1CbJbNyuNcYnPFCBv4okJKiFL+tvgKIMr8VpTHYjJgzbEagTkZp1SxzMTSdSmE+wOGYIxC+Twd//VPe3ZkjU8gnhs4GadWRWn6YpjjmkHLmZdBPlQlk8PmBLU6e8WEl8WMgfmdb4SUFlXB5J/IzIj/QN11TmAvilPTe0xFFYj5ESjmemO7lrmYl6lcZqCEZablwt5Mxfc0GFASAudPi4IDQ1Xrj+GxQ/DpBYSWFSWPejA8U4/4QiIbQ8hAEcaKthwcnY7lcVlXGJAXzBTEpzSZG/mJ+j4bQ9023rflDizjDtkYnmtst6Y8mqFEAwpziwDYAEU3ORPnedCrg8LHhLH0QsLekFeJMu8VEsz9gQH8IxOo33b8GnkZaWKFWncKw5nOnhgTePNBr01FZb+RS5oa8DD92e1tUiToWg3zybq11ZZNCl1sMS/RcdwFyjjGJe3K8tO/tmIsj41D1P+DZ4PiMnux28gPySP+8PhCqJiKUcRYHOFkvUsXHDtjMuWk6S7cmExScY+uBURnQ/KglHgNxXjGLIlerU/leZDkrXnW3vwwkihCoyDmHdVgNAa8CZ243qIAgF3RncoWhNuxwYhNA5QMG9IdA/KF+gl2ApuymNmfbikDSSwFbYW6Wbh0JX0XlyOECjff0AM6ae7hb46HgcwHEutm8AwOKNhSPRpPFpQNI7dtiNEJauWHTSdQa3Q0Me9Z7JN2lM98shc1tTTjnKYlicIQiryiM9/f/iZ9QEUheDZpO6XlRypY6UCW2BsaknPJ8YOTap2oxPhvAKneWZRgDTmUAAutOmdcp6TUekS3HJ1qttiFkDuzxfoFUhLwrMKPjMdGysikIUJhvdlRBk6lqXJnbeSpl5Ilx/H4lIX5CRXiKxnMSGI1IIvOdrrEFJ0LXzJaqgbxRDEuNKRHsnFv7u1VDm4a3edussVq3WoeeM2gbhuUs51NyU8jZJK1ZpcU5QMF0M+ZqtggUCzgcBrLgeCTf3/QmflJFVOFRBCXMzbqPtSAqNSh9T7p9Dkthgn//jsnfs0Zn38L+QAdJ1QPGZpZzlI3hv6pwOdIJXZUiaDKTEQYBpyC9MMl8+X4m8UMgWA6iQEanENh1QsWNWSAGZQACj8dClUO6rvG0IE5JnjecjeGyN6vdpopLdVYd9Dvu4C3NJerCsXcxaImxCUpwTTkroGjsEsTBtDTLbufEJDypB/ukEbzY5NpA6GIAoG52EMAR5HpPGTi1goaBax4xcqLblqYciCdt6S+WvQYAsFrd7cE+CiEul4voifMZf/fOWJneo7AlqA88PfRjOy7SkBGl/pYYAp+QU0pO+KYSB/qQ5EIuYUfApsII53qlMny3uyF+ik6BoyHTwB6pzsMwNdtlZo9Oh87OuVwFQPFGjK4Ap1pemuBNwf234bpQpLa1xXI6TmmADQEoLhfHaTsC1OkeTMfL3nWO4KRgQeZgQ1a0zBvdD4c6V8Q/XHCcKAvyGMf/YVn0KXv/CLMfAaH6/pPECE9IJKgmIgvMqiRKKQbK/KtKSgLCxbT2yDeXLsjApXcm08mO5xa9zSZXWq7JI10DJC2wGyguh1bz4G7gZGAOdDBQ2lelu7BUcbgsUaCghOTYLQ4zSmUsYoyfnK4MhOrnUw06uj099kVlMBmJxXisn9oOz8bCofw+eISOe0ajCbe7xaw3HomeANmAAwL44J2jXUV+sW8izYTzc2m7G/xaNBpLdDh0Awc66KpJsLSkjq1K9nOZ4Z4Gg7jvu7Xlj4DgzQ+xGlQZEovAmgj3tUjssIiYKSXaTY7YErseX9wWItA7U7QSCTWcCTG47ClIc8BCAYCBEh2HHhIN+O+zS4F98MQHO0qN7HTUdkI124OaB9pWlCpSr9H7WCuL+GE1AAIhfVkUgLewIx2TKRsa+Y0NFptz8ViV1pmgRKhId29dtw2rC7vls/OgpaMRq7u7Zks4l3OrecakBVlPPCP+dK6LaRacTa5PZykr9sNXAwHFVYFQcdskhccDvwM79SgDHewqi6HKZeE8TBdl8wUFKhEIPxBL4hi9u9nrHEYPT/HePb/68GyLn9sGnsQ8G31R+Je5EygIrC9YVuU1BImpWqk8NbrgY21ePwQC4S1GQdYVaTDi1BJnuF7Zz8HgfsIB+DK/NdxZCx9FwjSJG7d7vW3zjoLYGKFqYT547TiNGslY3W0FB2gd6TMQDkqX6logpr2wqm5r/leXXYKCMOK4HAx7VSAa1L/ndUcplhxHbDTgoJhVQZS252j4WUtQisc3h/e7IYjR6P+Oh0q74UMFFQmqYNsDw9De7kFVIK0CwwE2owc6UjfSI61E39XlfMCOjt/9An1bnWEuYxLgd4U8vyEf06Rxs/uB8gDxU0Yji1S3UgZAGGnZzFcrjzSeVC7HpcJKZIUUgoYny2xoOTeFQDepDb6EgeHqNtw4zqtr4xtwHuA3xXpcFc0BXJ0hp7w4bjvxVcFmVbFcBWeA9GGiJzQiikm81xMXP5P91fkMHFXgYarPqUVjSi6xKOMomyGxoSHFHjEejYcDvahA4KQ6dl8MFyEhxWYgHMK0A5OyIxv+Oqwt0XF97pRU/KSsV2N5bOcjwZSqACoVUkPq+83GzwChwx7khHpYQLbTuT6WT53z9H26E3p2GHUcUuiWoizEvQW3yrIz64UoF4nnYVAcVzNlaUBV+TuTglr49cMjRXGxPMBlhimqyL5Oqrg4Iteg2FEUFUgvKQd6VSB+Z2PkfTNy0965+IjrhoOCt2OVwiYmMUaZQG+DCMFmOTDCsmoXr1hGkZSyKEf79Y3oycEyG1IQKEjDI+Y3uNYSXQ4Vp3HrA6vQbIykLlugMZEptXmJawIhqpNhUCDCo90Hprvc7TZzuDZlpI7DBhh8hg9Ziyk/0wndEyBh7lzdB5XBU4vjOA1wyKdMcxmFlpoEYFDx0JS/ZjI80ldzDvReuxz18iGV7xqlHFD2Axln2YmHxl4TCOV7eomXxKkZKpkWrCsta4NxZVMF8NWJwAc4d/QpH0/VTclIxzUiUO7xCefdnroyTaMT4CLzOLQs1hbWQmH3cKRoNoUt3R3BMynLDxSRWFIkXYwoYuvF4uR55UF+p/0UP3a5PJDgdER9jR4PNWGCjeM4MRKhU318OEY+VkcoPQm3QXcjQzXbTwY5yAHNho0AXTuPMQqYiVTmqvMdp8iQySBhIp27ceYkHNNaxZ7LEknxOqGqqYxXq2vCawLhsU6gcz6Kye3AAX2iKiG35kPdbaSqAFC9TQALdSrGcHFDIhidPIgzEAOs8YmEQXNtIyM59RORwkdzS88sGuFXkelFVM3h5GFMEf6yCBdzPcPh3LKWBkiizUBwFUehpvoZjSsCQc+x8Ed2DB44N1xSoUzNfFlzjlkqkWCFD2dickRNR9azUB1xoMW6Hs6ayzFXid8uw/0RYQawpKkVBjbP84zy8RRFC6VrMVwcJ6RyOf5HZmKJQYn5RhckAxC6fQKbvLhc3euvrgfEinNctt+FA6Fa+gAIe1dzwLGvcbKYL3VHOCkFBACwQKFQU89xln4WenjT3kmmsQTNjtOrujJPu8AGcfFICOqeMjWhOeaDNUEU6JugPdLtwUtzuNDlGCQiclT2TsCPHtmS9tf8+3pANEkEDImrICTNtQWgT7YGYlDmMh4wR617E/ge8NU/IBS6RpeiBlypGqURDgjPrCgtDOqQA9IKKsiQ4zRSP5L0y0QpihGzCTbUSxNkUFRjrtyBam2iYLafBz6P4G1eF4g+z9XswsENqHQm8m23fqFmGE8rmVg8jOlE4KsfTx9MKiKIUEsWcPsU9ATuJ3Egdo6rVbpoUJIYl6/g0BrcJ+FhNdCY9aw6arqaDEPYXFrmlvNyXa7L9qgENojCLMCBydcFQiU6H+C12DbPa8h8WasPcXkohD/WDVxcGoEo0CE32bBJjHn6uQknwsIh4akZCyGiSIDpzFNghKCEijAOk1iaOLfHK8yH6dj+BgfOeT1gBUpJqChsyUSCGg5B8E40+OYLJCLBnr5ullEbOObBa8GIMkrp/8/w3tntlssd2BE82HRAuOAvwnWnmYDHn2VxHqSxU47GxonY4GQEEvhFCi8/i+UYd1Z5IIKlQEwX2nBSCc60qmZUo8v83DP0HjQzkj7lQ68IhG7si3Ajji4oi31zt3N2yyoPPhjMycxPkF/Br2Gp6Vm/WpJOvhHFqRTSxLnQ7cu51cI+JnGBsyVitKsYD/QKoJw2F0aNmJ6DOByH3P+zBKs55dLkWoUKAVEuhBv5YO1JL/1+XSBoWW1oKBg8IpZLYDPmvJb8tYjwjOFY8/UAf5AKUDNJBCSalxmCzEoQBldssZSsc7furDqdfesCciEACoPqiOVJcvlkTiSEOAnYynu4iFeNOfzj1ub6OX6gsjvAzJCPxe8P1v0MECr5qSw1RyN2WDN1v6w4JfOnkV+/kCsaFg7/iJBBWGkg2gP3sF519ttDD5SEeTjs71YdhEKkONsrTEdpElIDgpflhOxkOgHrs1gcQcqmVKy3K3NsSLIdZwdOhppb5xnwowIeaHdVILzK61RYMBADlejbLEsqNWX6wGiw3egSI08p6hkkWFzSbov1rNG88G3QIFPnDB9puW0DZ2Qgw/L6KfkOiaxhOlYKY6yOiU6JmyCZlqq3LNemcpH6FYE4VdWs7Izju6mvbTiVjykkwFnSCnKkDreulI6TMMqkiGQO8nBYNfZCaXvVpDVot1azLSAhfTQuuKnK5l0ENWAVtv5E0Qluh0SWDQakXQOiaq85XQ8INBNFN/G82s/AWRElg3hakFCoTPCkbvl5cjqKggALCa52au8G7rZxxwXchmE4w8W87VKcEqBYOzjWNQcHD/RJRtMIcFXu67MGZrSsRaYWjp3qYQmSNzbtXg8Ig5pe4yIucNE1/ywCouZoHFXJDCDxBP7XBA81XWw6wxgIRIC+he3g4MY9nWwKSnUXC1AchkeW9EB1t2aQZWmagVhTbCULRnUgQHGWJd/Le1P1eGGAPFA6IpO1JTdXBMKjTnxgO3gzaZdLAlL/Uk96YmmTuXGcpbtE/UmWE5X99IH3gqSpzChrCpLQQhwYBviv7vH4RODSfgFA4jJo23kYnsDD7XLcMUVuihZoiubjOByq6fPsfW508FIfDQ+0SlAuZjGuCATvesenmsqYppliSaNTLylcoGJfLDAEgSBMxlqtkSsZBTxnMAps0A+zNQ4M1yOcrMVkqObkGNgHOXum1LbHI13RBHoxyRa5skf4EXOnpBPwE8ve4VJHwFOjVnE12uKaQGCgBPgxVnPq+qEguLhl3JSUJAcd0DcY+5XHRV57FmTY+OTFthj0sNt3YJRFcNg73lXqx4Dv1ms0Xdek+fsyl7yByNaHAsEGNuEgmzCxirHqBqgdDXxqQGB50PwVgeAlKqDBVDKcLKgNOmKpm8ERiSH7myPys0YlEFwIKml3Z5iKgbsmHGq9ceZ08lQO54Tv1mwcBk4uDRwfHGXERlNlhsitBzoBDtcEddDDYlM9DRdOlALCCEMcd0Iaxrvy0YiArakVWlQ+Bad9uaGoLTN9QALjRyN9sXz4ajFIkZxkHkapMzivDtW54BqX6bRaIw/W49LouIM4LWRgC48d9lh9Y+XFoXD4GAwc1jubMCHOQETk1AZpauOikiuaT8/DvEOWBmkRhonHjTu+M7AskM+5s1R1dWA4ObCm4jF44a4uT6B8F0HUjQfufoWNPPX16SYDwWcORWK7Og+cNJACpCEkhz1T8sUIK5qCOCyrbKOL5pO/MTjzAsPYJwH+SnhVILyQIu8+oByT92kE/oV4ZRfpjMO1lk9DZTMnDw+oKuCNLglEl5rwIikGYgUawKiCzP3k6TiePpV5bLSil07THYCHJiUeyYxiVZMjHobx2NcxDu6S0ijsNvebpRir1apZHCrmF8MJuyazpLHGcZxl4IWfSEkkwdhRQWykU1Q73wYsMHwGSoxeMT65iEexFmYOfqV03OZK1AXC87DIxqytLOqDG7IFNSJkKPIIg1eI1vA4URcLnfZFVektPwwnUPGIaq1yllq/XdHXwIBUmpUdXVpHDKqywoUJJ2SJ7ugQCQTrSoCC5lp07ZxkKTDd9l3n9cHwuuhQRzVODCJxXrUGjh0ZUlpenKJtlRWZOoLhAO/L3HDFDEZwTaq+HThq2a5XrX6LAM5rAkH+3CsaT3VDZe+3CU4hUggw6w8cl1Jnmg5thvk3EAjbdsVq6w50WQ/908WadatCGEXi0tnC4+0a2KTGQ9GF1pQAxRHjHRsOmBKznKuKIocrJOqrc+FlX9kNx4q6JDESVJul91nVTs0X05JBjMqnN50uElXyB8frBBJxwGkA1TFAIGiSgFX7iDFor5tuO6VB+ZEkNpDZrzj2cTi/32zu55TWKHuDhZ/qqYr1HcLXA+IP1AlEK6UZy4zVUOl9Msd+Iq9zpGAYM/kBo2GQEu96lD4XLhoEo6wvUHwKm50SJROkLtv7juPi3BwvwvJyAgIJu6/dUIACKCaJ4XxXpkGFrzbGppwZ6Sdh8t4+2P89ZulxDgZelMwDNQZMvgICVeZRxWSYXBOLoFdGc0dwFAsC0RAaCJVdT7BjaXp8MippBq/szgGzEYYR/Exek4gU6mH8KjIB18NiXm5oweCt1DtIpED/sLh+8NaLgSQDXzNO3YiDdYKAqE6HgR1MYD2B92mKCX8oGiNTK4rjBCu3m6tvgfBiTBGPF12vAmKwvbsMTFuawLFjWXB2aVy6L4qqgFwsustqxE8pEWEKFk7iV18dCA+Ud1irEuHgLcGwBAu+QdU1MDAfi3nfcRWXIXvWTSOgynFkC7Cel0FN7eJfvccpFWQmJbdok/2UNjAXILMxApHZI22JfI6DjtGAWvXJVXreDM0g8kJs5Ed0r5zX4JRMSXsYCOAxVBOAahzM587Z/Gu4mIxHZdhybCpPA/R+zDpCVNYTQDUMw3wugSiPxvYOdETq4UTfhLYlZJUp8qegHBaLxaJq7VLxW1NlukJabAZ0mLJnVwRi1efIDC75Dgs1hzrzzaWzsazdzrKsIfnHC4rIVBYflSWt/wQP1DKj2I/JahglDFb3yVws/ud/MBbbreZRAg9ft1079hD8kJRlZNeCwpgvAKuBBhSYC0ikcnjK7Suh6vbzENzrJoFpwVKe5xL8Ypp3TLnPcnMpmM/JlEOr+vgC8TEfxhhXSUSM7domdjsCjxgYmkdgzHus7OFTUnIqY+Dc7cGVjL00tTxuM+1S9HqslM8DSMP9PbvidM0xqdC2FRBJZDAjob+vWRYAz7DIu1mRgcOB4ubpcQllagfY5XGivSGgipTk8plZekJmWACCxfzt9do1eCCHR4mxManXYbdG19rMLIMCh10bkpMT+GmAxXikzCeK2wMGq0yr7YJUbjaOCPyI9A/4NuU5u2p9xOy3ckhhbfSSHiSiY1TocXFgZrpQBYUjCkd4ws7THJStsF2lJPDbUE/KGI7GZPFk1aLOBs4kOg9EgMUOXsItOemI/Ysj0veRjuwjsVrqnOFSgM9vqMUvsohU4cxvV6yYQWoZRiFYz5NlZbxWD1gLt+9UrQLWE4XO4JpU1AefJ/gaEgU8sp3BudFiju1xr5fZtR+DCJTFk1WeDBCb9iBOqSAlotWFSaBuHoTgQVlRjOHON7WpsoK7XnGWYSpTOMYxhhWvXVUXoX7Ic3Cf8rBWQ6XTTGBAl/BrZ/1rPlQlMvRax5J2aDM99CSeDXCxSYCtB0xPWEbz5dlcTKdHta2vjwHcFmg+GeJucUlLIsMynj8ml2tKGUBKZpQ5aBcYtoIyCrG9RtqYDbgqEH9Qz28ciyCNZR6pcf1cTAZEQllQVGBAJLgagKoipg9T4thhigEJYHqmMzh0BEXqkqcpNmslRnP2TN3wC0vbDAzmYc7cNKXkYsmoIlNco0blY+2yG5j+liP5alF9QvP0/7gmEE28F0xJ2vJU6D0vPLFwdz/XgWtUZhMSBzrGU9KXYw5ix/3QlHFmigGLBLzMp6mSCACCjKJVc8JdMxdpQIUkqGVMimJrHoGJAzDbwFucDebjdaBO0QiP6jWxGBIrGK5bgox5GBlFMRz2VO8KK4BIgDTMgUuAolSacqyd8KkuMo1pIG5uRd3Y7gpzNzjMGIkuzZ15sgAIKqV8eEo8xKHdWTsYz89SOOVZiozWSDnHPi6FwpzPTWU6zXuHsNjZau7rKcXxt3FakKN8VSD+DDFWF9i+jDI2n8RxbAfUg1o8ZVkmpqmnXBYAJ1hZOqreQZUHflceU2dDE/QlmFCLB6cs7OcpfbLZRaIJHAL8sradAifHpdM0ryPjSCXJmIZ5OnnA4D4iYc7vHYxY+jwgDJcUYdEbrcwK/7wmEI3fkA1nglZIVDGqwBlUy/oM8LqQYB4nmIMZqprC0ZTCcF6cJ0aERaY4CbU5a6FMcIEyRTHG2ONrYYbn0pn1gCzbUYReZ0LdnIl85uzvZMFluMrXR3VBAmkhoRKBsp6RPIF2DSKKbZ2u2q8xE573OrNK/dBl9lOpLMPaPM3nT09PZcGt/wD8EjlVN0/6Zi6LExjdgXtHSFDYW5sDdMQxbruaHUD/2wI9lMgrKHOnS/SAUg6xHonDwsCm5paloregMkxVoNQPRZTEyEIwUHX9VqZ+2M30/FAVrOM5O6+wwJTFbk7tu3iZxzFnw6Mg60sMNmGYatAmJDDsTeniKeYzLeTrooPTZQSeB884hRy57RcTZK1cykxqgTKLYDzdaiwVehqxp1YKBAEVSsfwba4LBAXrMjsHLx8otqXGcWlH/HXnym6D7Rn0ADHQAKoTA4meSE2Zxrprtt1srEGc2q6BYg0yZNFioi1lA1nrIdY4WIrWl2BJttITGK4EZ2+3LJdT8BttOEUq6hXKQBrgHuKy8et2+VGMKgSedgKLFtCKlb66paq+EHP0c11KRzxizME7CunjxlZMUaDSxeKn7aqzPTvugPuZ0FhcDmta4HYxsffcAle3mxc8WRgLTR84peFzVqfa0VE2wAZVAjyMEtoJGr1/KNcPgPh3qMIxoJGw67rPC91tt97K5IDf9T/TsS4yfdBVyJjH8voZ0WwsAMnsAKiYaDU7d83WWVzazkWc4b3O/nAZ7MwgzWJwTWJs56B8oT1SLFX5W4shOt7LsveWDwfwyqRe1ZNkMTgD4b+vC0RDDerD/fC8foi9jV01CB/Hs1aF+ECZdVnZZGJGar9zlABljhMwbVhYfunRzPg7mvPaWW9R9QoACRi5wPhoTssiKKZJurLkEaBSFlTCVi6XddUkDY9ETkbsg3sfmAH8w2kBmN4KizTA+YC6m0fWIvoOhqY4cj2hIoajik0gseKu7XgkgWaf4m4ax7lJbeUC+6P32OSIQzNcB8UBECvC0ylSyq+wJ8exCsgcOWFAYD8sVKZLSYVUigXrt3Oyo+juX3tawOx3LDmQNsOgKi3Bq9TFtzjU4ogtFcD45uYTsCsuEmAcVJEEnFqs+ijyIPQyaZti56pNPHxdhI0W0Dixe8G9aaApsROKTwfAu5g8MPHAQst7NbWDjEag6ZRAUgm0BaO+154fgV3yYPloEldZU4ZbHPhWeEgWchugmobqVCR5nhxJY4wpAJVkoP2SOM+BYIdZbNotUwjhOBfHEcI0TZHmxL66RRIW5LjT80UkyhpkCg+jp/8wfTjyKBe1wozFzkPjgd1yJpVZXn+0ikG7dl6X7iXSpt5crO8DDMq+x+U99SdSl8lUNSoUJLYC1EQX14HAay3CNJA4PNfGnjw7jbMsK6RA+nUC+0dbfxOTZWHyoBvd5jt3t9s5YHWfFhif2pXBCJ7hGIJVi7FiS2Qn7wOTHH84dUioECDu7DY1INzf5iyGT5ZRUqslqQtueT3yowTZtiPV9lMUmO+J0ArHXRQM0RU4ucbwMkADm3qspLDTE3ejTyhrBC4Jx4THi7JtBdjkE07FU++bxNuw0Asr1oKMcwbXnzqEjX4G+BsR3AceZI6NEqXaAMerrcVwTN2fgOWxU+rtguc6oukO3in1U0yRZDKKA6YJWRGJmOdyot2U2OzFyyHgvKvmNp8BoW9ZzoPjigyuVm3bgUo84XB/Adwvij40CfmHBOx3rDXA2G2WKuICPzIDJuFurNpUEWe+0DDgGaYW4DE/zQU1MoYizWQcnkKiWDQFEFx7Kh0D18A7xZK8b84PEwuZcuvsUXlbD0Nzviv78o3NnDrJxDg1qogqzk4ja/r++b8/M6sOZy8ZQOQLna1VRRK10Qkb9joxK4meITU1T7nlDwinCLl4gXrZKOgV4pQSfNUYfsHBkEkWjLTvZLKxGOO3xO62B9UZrCaPaz5r3d+7rukLNWZSrS1D5+YjAy1/ZnqhUUTKqnkGd/qB1193N9wleZ1jqgGE50aw+JzyGdPEHaakoGRzmSXgY2O/Y4RrO0HFY6l2YeaqIrNvgb2Y8rSAKTNr0xxz4eKYuuhKOmVtlrtgxD2EOHaUhtB6qGzfryJ+Zp4lF51KeJ2JJVUXWTEKnEEFBTXyoyiQJd1R++eUDCml9KdwOqhp1AhPwBsLHI0JbyZgUlOgkmaK9axwA6gmMcY94njXeEJzYu+dufLBqd1+WR9gKHxbnVcsZISjx+Psv2Ke5ex3zB5h4i8riq4UTGFP9rMY1Lbv4QwcoFMGaU1SmuOHsW4vmC7MnWGoetWwS/XMOThYcZEVWHQAJy9UYwT6GKvAhQPkc06pRx7sBVXxkVc31WsvGQqh16pjOKfAb0Tj7L9iwilvbItxsG4chTQkHIFJH2tn435xXMwtzgMCDmT7p/qcMwfAGJ2qCghPWXYqsOaCWt6yMCsLydEbJSSUnqUAIDW+gpuPmaSxnp+uSLatOz7lSBZ4eE8YYv6ambd/nkggRBZ5VXTGy0ZBBQSNqlPeMU42J7FmfwkLpdQWU9H8vSzhxdEJCTgWcHm6NUhgs5duJ2aXk/AY620CGM95mNRXwjrlyZBBDto2MU74gdO/vwIInIvthSE3hpfDJGpjsXGts+4OxzkwyvWk0lAaxUgd1O1t46XxaKt0mVdeCoZQgEfaWuplFKBXOOJHZvioxsfqXplysIo5kspmhKcotu28G4M1/aK52C9/eGWVU1Uv4qUj3b+yNBddxapoYwoNDKDxMkApcJgUWv/eml/cY1NEZcGIdl6ACD2iept1ztxHinUTU6amVbsj7wucD3ntOOXidfyaqa/RDfxx/GWT0lFJeOVEFF39089Gdrmc9MlQvIrGs3Ih4FhRbOrSdLaVGgexsGPa3AJwJmGWxYwC/2cLXTnUMg/EpyZol4lN3Ct/s7aGexA/5qrmwrDoaZ1oLtJXzc5vCNXo5ymJ7utSZDVGb65pNk42BxQwOUlAPCwog+G4rW9ktfEIkiFMYTebj41Xpm62bVNnMVtfQHFB4RlaZVTtAlPlMuaj7gmPTeY3cQ6M5au2KbwIr2xSqHU+xsypNkNR8csFVgZgrH23QEWx4KGUTrvXXP3l2Ha2+85fz3KjeRnQ0KIpKpvRGN1vpJY0IVMv2Z2zLtnp3TNwUMe8fTSM3l1g+Q4gmiEHwF6nOE6U8AIKVUYvsY2fMw7uPTpdINBoSSdOW1zE9tvH1Gi1/vLkVvvzBa0xkbAJei6ghq0NUohyrAqOR2RWFT9KHa3MgrEM1cH9uo0rjd9K5ZB4SVmTkj4L19nsqq3pm+Hwaae4BG8VIuY9cZz9+oyx6m9E4u7bAwMwiMNl8K8jUWsc7anWG27mwFTUSEDqqSOZCEZROQvoBLRMVfF+bMPjT4mRULXvUSxjrlvoM8lyanPSMVy10WHtKXUTzEEi6Gg0G4271qG1X33frjVW+1bvvF81zu4TA0EUUw0hsMC75eWhbEU3m6UruBFaPSQjyzHd8NGT8ZPrqVjkYnQJ4pS9UFTRo3rqz53rqQ4bhcNmQ4RguGsfcJ4t3OlhS6tG7uii/vCO2lXVbJ0P27tGo9MUOGkJ57rNiWJOeEMDWma9cpgmfC6X5qira+kiClVSvuGjmy5/bnMbzc8v0m6Y4ELDQOejcH98zQMd7lRce0q1DM5uTncydJ07AGE/mzXgLtsOTrd12u22c7k48OsixKXXu5zvGrPZXau1veDCdRrzulHjnDZqdiiLhC48Bn/L0JOJA2mC85aSk/+Vm9toQpkqc8NghCo0jKqmYPK15opf4VhzrJUmTYFzxdqrl9m6te3MZi2cZ7pt9VqtQ/3quZc7oFPN1naFG6NRPfjHDQ+tQ1+DlOSmnOkzUKxSKYhIpqIbdzPyhD64r+wngcAddhEl7sjhsiM1+LQWlcA9tcoln06pRhgHtaGiEK3zuQn8et9qgc58M1KwOvc6IA2gTmcdbPSZT7GuYAn24TglZ4W/MxMIdmrKvW2gvmtUvW+svhIIKq8TPOPIM7i+DmOEgb2sYlQbpSAmCzIeOJNzPB0/dxovTdHaNlfAEVpOe4sDLOF3B5XEXYe3KnTOl9Z2jzBsL731tse7DXF57L/Iw3dU23Ftf6JZjlPhkLJuS/3afZ9Up5/FoXY4Qi6XVQtgXdpsrQUC/AKDSu5AUz4yed5vG411C24UTMK2Q4s+73hR9t1+i7OxW84FfJEGvL8Wh9nL7BmrSCa83+tpUcal5noQNLiyY94Ai6+hqNWBel+8AXYWYo9tbNTWfeIjoDUbzC+Vplzq5YPALUsXYo9bPgGK9ers4Dq/2es9RA04D71VY70H8zprHWbMwZ9VNIr6wB21jvtez0DVg24xFJyL8KOD2d4NBI1DDnk7dBJJsqB4MiWVSizvKfbCQGCDUVu0nms+xJ7Xna7We3HZqtW3bEHv7siCroXYr9c0DLel/ZIGQMHjsF1Uk0pLqK2qjo7i46S7OM/LwoCPnoyfBgLVJcYDwywGQxWfVNKZMv3OHCtAuUvbnTtODx7965HHeu9ro3O4nCtjQW/iVo3LWTsjjUPNQWs8t7ik01QMZTdXkTpT9RPx4zjJ3ORi5vDPrwaCBkNHRSYD249D7X+hYJq73aasUm+75v7uL/xx3yw/0jnrNfJYEdBZ0bLH82U9qzyQ+lfPwPvAjdF6AJc1p3KRi1rkiKUhZCriIDex6u/rN8lTEjT2gzTLKE+Fq17wYYC3I+oJjt4bHuXLfl9+cNW6+yvI+3Np82atb1z22Wq9PYtNuWF2M78HUklDFWh2jdSLLvyPhmTeCQTuVchsHEwZmwlWK1kcexSjevlM++4tadpWK5E7hzc+Y38uP/jqaOivR0Zaq9ABch2ohtGIZyR43Ib+sUjEO4FAkfBoPu1JFkXqB2pyYmSPqlfptt780v0PgGjWgDi33hAp2pxclvDt7JHWEKdM8BhM7xR9SiDeAcTqNw5J4IiknHLvHMntjppladn57SfSbP7gaBxWVZTizYXajVrT7cB8DE5llYLXxUVqrDR/W/0KIGZ/EAxdnDV3KvuYMYz7qOtnnM7bEJ4PJUCr3v8OxOxweBPMTrvqPvaZS3kqNX9KR7xcz/tj9iuAeGmeeC5lYbyaDo0zJFVL7OHN7eh3wu21dFRm9aaOKIGYNS+8XeAv17acllgejKSIY9M0Y2mPqGrm9ImT8R4gKMGRsd3C1pIiVJ1k8tnmKTj7NxWE62w7LXFgc/Lm0WgqKQA3/NI7O4e3BGvlqJAlHAyVNMPafZyErZo7PmE73wcEiQTtqcKVPBKOSJGo6OUzicSbQj07DHB93bp1IM70lkTMtvSVjfVB9LaN1dl9K5k9O6u5nv4oK4dE2CM/jk44ct37pEC8C4iZygADfZFFFgHT5h49j/jlwH3zhczObfCrVhh0OcABuevdzb7dGo46ApjToYdYzToH133LCHccAoKSW2VdiLRVMYH34YjMB4AAkfC49ltSBvBEYxvYCw0u35MIcW6stoftatYAZnQ4CC6wVJseqeh0feg1W0IcwNkAz2u9Xb65JJXK2cHZIovhqcVARhc3feKwWO9zAvHyziELVAREbW5Y/OPrzYphQCGa5ptAXDAoc0aqMOv0gB5fcFeVEKKHITr6BxdLnDEqA1Kznq0ug/XbygYrhTjrS+McqIkks32M0HkfDkR8CIhVSHddFvRlyoziywE10XvLjm/hHkHgW+ct/G/LPa/La0+bkpvN7cEd4Jey4Mz23zkaglZpxGUf0YhKjz0glxgUOK1+JRBUfwpsFgslcLpelQuM7e8djtm6d2nB0272Ls31pb1+k2gMxGqFUM2Aerrtt8glbQs2R6nuoA7jgKcyewVqKu9zB+PdQMxCmlptB4GfZ0m/ygJ6coQbns9v0sLm/7lgUUDr0nYxHoFqAbRDp8PR/EZj1Wq7515vjZbUGVzuZt87GLWRfCgTkn441V+HjV8LBI2UwIKqVJz40SQW93udgmcM7rfeVN2rgyPA0+5c3ANt5yItub9bo8bED7QcF3VEYyvavf2bt7S+AA6BnekNHTzChnpnvWsIxLuBoJFMOlKKgdwc14iTQ24/o8J8G4nZ3dmB87F169vDq4hdB4/MbC1e1Q+8Yho7SmRkZc8SjTTLgrzgucSfM50fAuJPoxr/CnoCX5wqpumiwhy0m2+/psb20tsf3AOeBPzzalk2AnF3bovt2xoPt3cBDiOVesR2AU63xSNqbPOMTwvE+4F4+Z1FIjSiWICwxmWhALCJJiBx+d6m9E7PabttoUxmD7dbns+87RGsqnDcw3cU/2wP8rCjglRdmgcULqLWhJSip3+8/A1AUOElTaCOcYCMV0YOgXGO0IiK/XfktLHm/NaZrx4iIXr4Rg8YxeF7XwaO2IDyGFF5IonCRTi0iyjeb42/AwgqJcIytswLY5qd1edcEyAhEInBZfu9F8YLs+vXqry+d8pne2p8gzPgVcVLFKWMojz+eEHE54GgvXbeCaxnDPLpJWGcF6qmKJGjZ9QTrSs8olI/kL3gQu3a8EOMUvLQTO/zmvJjQFAPB16Fb0dRIYMRzwDhSuURTf9uza6EQ6O1IxxUPWXfqHY4dlVgQqxe/iYgXpoGx23TbhSB3RBhyTBBd8D7aEVX18HhgPv/QB4ixduw21nP8Y/ImhrNl78NiJngEnMqlpCnes0dzjd/NtvgWzWvIBQd5NUi8MnbJSG0s6rMkWmtmP19QJDloFKJlBcX6KFHKsD/3MJwUu+zimK2v5DjzUkMaoEMpNEve6s4x3cldfRB57VJ28s8gbzG82rPh/nEM9b7tLefe42rQxsX+41GwtB1ykHJqcqkb/PlbwWC1QTPYKvGrrEV9QxQYy2MYh7Wq79ejVec8u2LnFbMoF2CR5tn7VIIIvCD+kxUr29cC4cPA0FqAlyNsIpnh1RwRzJxSkdNFIoLEKWtvlq4JJmWZuNKaH016cI39Ad4hzZaTVc0R0Hm1dzNLFVdnjo81/i7gcAUoFeuIVEMG8ypOs1GOnq2LxhjPNxpUcDymHWH6mVwEzT9XtOGbMKguW1tFVKt3gU8dtcx/RFjW5ZleJHe70ZA/LZ6+duBYIKpOhd4mILMwE9Wrqkh7FEgcAKM2ooM8q6itt9o+XrBCNPOzvZCNRY21gtqmPFnnbCBFpAI1cDyqymITwGh1ISu4wrtIPTSx1g3M3jgmfrUZ3Fp7dXe+O3dfn+33lMoYs2VVCo6w79ZgXRaF2ojBeKo3W7sbw0VxJhxpHJjz7giDp8BgrerK/qQSDstYtvPVH0VRo7gkQbccuI6ghXEAesKW7QsnXemt3qqYoT9UHTILthsDeQhiE+GzuthxDhSpzD2+c3+NXH4FBDsdPBzwiGHuQ8OYpjHyivvG5n0n1uCWjUvLVqgrjwtikkoSbjjwB2Wl21RFjCPc7FHqCVrO5CSXO8S5DrHvtcXs38KEAoJlle4fZxx04+B/pTLF7zMHj03BSVwL9v16n976TPMdJH4gCSNAl2dpCuE0iBQq+NCTulcz2B8HgiqHuHNArZl9LsSfCKK9etmQHSX7cfnJne4u+3zd8Cg5M+F6sQcM/Af/W5Yei/qG3VxtkseeVp7XhmHTwIBjig9tFAEshAYVaaxFnBQwrLBI4xBKp5Ntd65Lc4toFkNxZtmDTCp+9ZZqBEhF4BhZMenqvetH9F+CSy4xpHrueTyZ7F6+UcB8dIUbN0ybGnFQVqkIWQQlvwCR0YgFC2xwxki2OF/uZwPPWJWvXPv4ujpOTth4g5J6oPwdBQmSUd0IjIfMAdtLCiJ8Fvz5R8GBCJBrzjEzuws4FkqAIdnWdof9YwTVeMFpmleHIenF9dna7ttB9e4gaEIZLcuDTSpnccr0To3L8uoJOB0dRw+D8RL87fSAzLylKdYovxKu0h0VQ2uU8uEHWA9g22aQlycHQLi7CgLauL/BLgkJDS82gxuoyjKWaegLUMtZF+AwxWAYE+U591QTU9CI0CTwM9xs23ZKom74rup2gnwHNjNJvxuBs88oyhI46xaeKQ5dU59nZImaca2yQ1sX4LDNYCA06GOdGabYRJy2UThyygNIq/cikj/wCGJRRrYcPGwKhv3b8g4OxlVOyV/bpJgbjnHxclUGRT5ARemiK/A4SpAvDT0SnEcu5X6GNrGZHWS4aiFxKutiOSUyOl0yviK4Ar1Es16m20Y4yRMrPWOQQtjf28oujQd7Or24opAKD5BLdoZJqkxhGIHuBY6Ed2SXfVr/Kjqp603iuvIk4fztO3CQzwDeTqlQRFiYQi21DVe/sFAaI5JwXX0iGLwn2mQe4TKvhKK8q77miy97jFW/0T+SABZpY0rNghG5vtqcMh1efX1gXiZ2SoXjIO0rRi3A53ECRMdJu4ajF7dat+rz/cqPYpqiWSY+mlBTkvIffBdbhUx7K/C4WpAcM2d9sBpTTPy7CjAmdVRWUzfr265uvsaa8C2eVX1D6wCW1ozGnjHZypsvrz884F4eYxLYT9h/WGMwxvjIPdwrxDOoMCASrlYt7ZYllEwrAgpGIZBqRHET1PEAESi0HG5L8ThmkCAyjTKhxzh2NYkFWGaw/koqH0WJ01pZwq3uCSvxCK2cXqjh7MLSSSCyEgBAy82WZqMLzIXXwDEy6xZFovTZl40n2meZDGSgTQuilwnB3HAQSoLLsozUFB4cjQCwYHqDFhZF4UhVFWtzdnLfwwQcDyEUaXkCkwOAy2UEVbgYVI/63pq8qYHZ4aaq8lho7kgp5Q2XAbkVPRDaYbKd6PpSo8vL/9JQLw0mpGOIOBgRZzvF4CDGn+bEetneRHxBMZE8oxSDyNPcPPU2Yqr5HMc7siTQpqNl/8wIGpCASozxHaOAMfTYbVLYlREot9NQyMlH+1EqgPVQ0FrdGRK/TmZrRaYgnb4anH4EiBAU4gaO4jsmJcJ0BiyqCSVIg0jroHppnFeEBAxng+ZhOTMR11VISO+WDt8GRB4PsLSlzawUPrEk7G5nZuNp/TTPEYRwbnCAea4+zjmkT7zZNuRNq3h15+KrwOidD40VTJkbmE8M/bKVDY45KQ/se/FBn8V3QjQKRHxSVmmOO1fA8OXAYGq4lSj0lkuI4vnFesiozjmJtY4yMIuKYnMLgAINKI0/wA4Vvz48vKfDgRAYXMghRVnLGVuRyW1DkE/0KJcD8fDh3R0TriWpOiGqj8nEr8Ohi8FgsaQhSWTxiBEqHHAFYF4DBKu9U+wjRS0BU7oYA0ZiuavhOGLgUC1KSLvtb/FGxkKCfpR4IYU6rY4FSEGrNXw9yQSzcbLy38TENj0D1gkXh0JripBHxsnIkY6eg9GtuDZRs3HXw3DLwCCsTBjjOPWo1P9V1EpPaQ0zMTfgcIvAgJJVuO5acelZLxxeUkRBEGzMXv5ey7x637UDCTDxgUayatwlJckYSRkAJLwd4Hwi4FQaDQen5uBbYs4FiIW0g6en7+ZYPj/BRD/2OsGxA2IGxA3IG5A3IC4AXED4gbEDYgbEDcgbkDcgLgBcQPiBsQNiBsQ/4jr/wF1wo+8v4nqawAAAABJRU5ErkJggg==';
+
+let equipmentList = [];
+let borrowsList = [];
+let adminPasscode = '';
+
+/* ---------- Item-picker state (multi-item borrow, used by both new-borrow form and edit modal) ---------- */
+const pickerStates = { bform:{items:[]}, edit:{items:[]} };
+let editOriginalItems = {}; // eqId -> qty, only used while editing an existing booking
+
+const today = new Date();
+function fmtDate(d){ return d.toISOString().split('T')[0]; }
+function daysBetween(a,b){ return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function shortName(n){ return (n||'').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join(''); }
+function esc(str){ return String(str==null?'':str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escAttr(str){ return esc(str); }
+
+/* ---------- Demo data ---------- */
+function buildDemoData(){
+  equipmentList = [
+    {EquipmentID:'EQ-001', Name:'กล้องจุลทรรศน์ (Microscope)', Category:'เครื่องมือวัดและสังเกต', TotalQty:15, AvailableQty:15, ImageURL:''},
+    {EquipmentID:'EQ-002', Name:'เครื่องชั่งดิจิตอล (Digital Balance)', Category:'เครื่องมือวัดและสังเกต', TotalQty:10, AvailableQty:10, ImageURL:''},
+    {EquipmentID:'EQ-003', Name:'เครื่องวัด pH (pH Meter)', Category:'เครื่องมือวัดและสังเกต', TotalQty:8, AvailableQty:8, ImageURL:''},
+    {EquipmentID:'EQ-004', Name:'เครื่องเขย่าสาร (Shaker)', Category:'เครื่องมือทดลอง', TotalQty:6, AvailableQty:6, ImageURL:''},
+    {EquipmentID:'EQ-005', Name:'ปิเปต (Pipette)', Category:'เครื่องแก้วและอุปกรณ์เล็ก', TotalQty:40, AvailableQty:40, ImageURL:''},
+    {EquipmentID:'EQ-006', Name:'บีกเกอร์ (Beaker)', Category:'เครื่องแก้วและอุปกรณ์เล็ก', TotalQty:60, AvailableQty:60, ImageURL:''},
+    {EquipmentID:'EQ-007', Name:'ตู้อบ (Incubator)', Category:'เครื่องมือทดลอง', TotalQty:4, AvailableQty:4, ImageURL:''},
+    {EquipmentID:'EQ-008', Name:'เครื่องปั่นเหวี่ยง (Centrifuge)', Category:'เครื่องมือทดลอง', TotalQty:5, AvailableQty:5, ImageURL:''}
+  ];
+  const d = (offset)=>{ const t=new Date(); t.setDate(t.getDate()+offset); return fmtDate(t); };
+  function mkItems(...pairs){
+    return pairs.map(([id,qty])=>{ const eq=equipmentList.find(e=>e.EquipmentID===id); return {EquipmentID:id, EquipmentName:eq?eq.Name:id, Qty:qty}; });
+  }
+  borrowsList = [
+    {BorrowID:'BRU-2024-00019', BorrowerName:'นาย วีรพล ตั้งใจ', StudentID:'641234573', Phone:'0812340007', Items:mkItems(['EQ-001',1],['EQ-005',2]), BorrowDate:d(0), DueDate:d(7), ReturnDate:'', Note:'ใช้ในโครงการวิจัย', Status:'รอการอนุมัติ'},
+    {BorrowID:'BRU-2024-00018', BorrowerName:'น.ส. ทนวรรณ ทองดี', StudentID:'641234567', Phone:'0812340001', Items:mkItems(['EQ-001',1]), BorrowDate:d(-7), DueDate:d(2), ReturnDate:'', Note:'', Status:'กำลังยืม'},
+    {BorrowID:'BRU-2024-00017', BorrowerName:'นาย ณัฐวุฒิ ใจดี', StudentID:'641234568', Phone:'0812340002', Items:mkItems(['EQ-002',1],['EQ-006',4]), BorrowDate:d(-8), DueDate:d(1), ReturnDate:'', Note:'', Status:'กำลังยืม'},
+    {BorrowID:'BRU-2024-00016', BorrowerName:'น.ส. พรชนก แสงใส', StudentID:'641234569', Phone:'0812340003', Items:mkItems(['EQ-003',1]), BorrowDate:d(-9), DueDate:d(0), ReturnDate:'', Note:'', Status:'กำลังยืม'},
+    {BorrowID:'BRU-2024-00015', BorrowerName:'นาย ธีรทัต มั่นคง', StudentID:'641234570', Phone:'0812340004', Items:mkItems(['EQ-004',1]), BorrowDate:d(-12), DueDate:d(-5), ReturnDate:d(-5), Note:'', Status:'คืนแล้ว'},
+    {BorrowID:'BRU-2024-00014', BorrowerName:'น.ส. อารยา สุขใจ', StudentID:'641234571', Phone:'0812340005', Items:mkItems(['EQ-005',2]), BorrowDate:d(-13), DueDate:d(-6), ReturnDate:d(-6), Note:'', Status:'คืนแล้ว'},
+    {BorrowID:'BRU-2024-00013', BorrowerName:'นาย สมชาย ใจเย็น', StudentID:'641234572', Phone:'0812340006', Items:mkItems(['EQ-007',1]), BorrowDate:d(-15), DueDate:d(-3), ReturnDate:'', Note:'', Status:'กำลังยืม'},
+    {BorrowID:'BRU-2024-00012', BorrowerName:'น.ส. กมลชนก ดวงใจ', StudentID:'641234574', Phone:'0812340008', Items:mkItems(['EQ-002',1]), BorrowDate:d(-20), DueDate:d(-13), ReturnDate:'', Note:'', Status:'ยกเลิก'}
+  ];
+  /* คำนวณจำนวนคงเหลือใหม่ตามรายการที่ยังไม่คืน/ยังไม่ยกเลิก เพื่อความถูกต้องเสมอ */
+  equipmentList.forEach(e=> e.AvailableQty = e.TotalQty);
+  borrowsList.filter(b=> b.Status!=='คืนแล้ว' && b.Status!=='ยกเลิก').forEach(b=>{
+    b.Items.forEach(it=>{
+      const eq = equipmentList.find(e=>e.EquipmentID===it.EquipmentID);
+      if(eq) eq.AvailableQty -= Number(it.Qty);
+    });
+  });
+}
+
+/* ---------- API ---------- */
+async function apiGetEquipment(){
+  if(DEMO_MODE) return equipmentList;
+  try{
+    const res = await fetch(SCRIPT_URL + '?action=equipment');
+    const json = await res.json();
+    if(json.success) return json.data;
+    throw new Error(json.message);
+  }catch(err){
+    console.error(err);
+    setConnBanner(false, 'เชื่อมต่อ Google Sheet ไม่สำเร็จ — แสดงข้อมูลตัวอย่างแทน');
+    DEMO_MODE = true;
+    buildDemoData();
+    return equipmentList;
+  }
+}
+async function apiGetBorrows(){
+  if(DEMO_MODE) return borrowsList;
+  try{
+    const res = await fetch(SCRIPT_URL + '?action=list');
+    const json = await res.json();
+    if(json.success) return json.data;
+    throw new Error(json.message);
+  }catch(err){
+    console.error(err);
+    setConnBanner(false, 'เชื่อมต่อ Google Sheet ไม่สำเร็จ — แสดงข้อมูลตัวอย่างแทน');
+    DEMO_MODE = true;
+    buildDemoData();
+    return borrowsList;
+  }
+}
+async function apiBorrow(payload){
+  if(DEMO_MODE){
+    for(const it of payload.items){
+      const eq = equipmentList.find(e=>e.EquipmentID===it.equipmentId);
+      if(!eq) return {success:false, message:'ไม่พบอุปกรณ์บางรายการ'};
+      if(it.qty > eq.AvailableQty) return {success:false, message:`อุปกรณ์ ${eq.Name} เหลือไม่พอ (คงเหลือ ${eq.AvailableQty} รายการ)`};
+    }
+    payload.items.forEach(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.equipmentId); eq.AvailableQty -= it.qty; });
+    const items = payload.items.map(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.equipmentId); return {EquipmentID:it.equipmentId, EquipmentName:eq.Name, Qty:it.qty}; });
+    borrowsList.unshift({
+      BorrowID:'BRW'+Date.now(), BorrowerName:payload.borrowerName, StudentID:payload.studentId, Phone:payload.phone,
+      Items:items, BorrowDate:payload.borrowDate, DueDate:payload.dueDate, ReturnDate:'', Note:payload.note||'',
+      Status: payload.immediateApprove ? 'กำลังยืม' : 'รอการอนุมัติ'
+    });
+    return {success:true};
+  }
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'borrow', payload})});
+  return res.json();
+}
+async function apiReturn(id){
+  if(DEMO_MODE){
+    const b = borrowsList.find(x=>x.BorrowID===id);
+    if(!b) return {success:false, message:'ไม่พบรายการยืมนี้'};
+    if(b.Status==='คืนแล้ว' || b.Status==='ยกเลิก') return {success:false, message:'รายการนี้ไม่สามารถรับคืนได้'};
+    b.Status = 'คืนแล้ว'; b.ReturnDate = fmtDate(new Date());
+    (b.Items||[]).forEach(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.EquipmentID); if(eq) eq.AvailableQty += Number(it.Qty); });
+    return {success:true};
+  }
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'return', payload:{id, returnDate:fmtDate(new Date())}})});
+  return res.json();
+}
+async function apiApproveBooking(id){
+  if(DEMO_MODE){
+    const b = borrowsList.find(x=>x.BorrowID===id);
+    if(!b) return {success:false, message:'ไม่พบรายการ'};
+    if(b.Status !== 'รอการอนุมัติ') return {success:false, message:'รายการนี้ไม่ได้อยู่ในสถานะรอการอนุมัติ'};
+    b.Status = 'กำลังยืม';
+    return {success:true};
+  }
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'approveBooking', payload:{id, passcode:adminPasscode}})});
+  return res.json();
+}
+async function apiCancelBooking(id){
+  if(DEMO_MODE){
+    const b = borrowsList.find(x=>x.BorrowID===id);
+    if(!b) return {success:false, message:'ไม่พบรายการ'};
+    if(b.Status==='คืนแล้ว' || b.Status==='ยกเลิก') return {success:false, message:'ไม่สามารถยกเลิกรายการนี้ได้'};
+    (b.Items||[]).forEach(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.EquipmentID); if(eq) eq.AvailableQty += Number(it.Qty); });
+    b.Status = 'ยกเลิก';
+    return {success:true};
+  }
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'cancelBooking', payload:{id, passcode:adminPasscode}})});
+  return res.json();
+}
+async function apiEditBooking(id, payload){
+  if(DEMO_MODE){
+    const b = borrowsList.find(x=>x.BorrowID===id);
+    if(!b) return {success:false, message:'ไม่พบรายการ'};
+    if(b.Status==='คืนแล้ว' || b.Status==='ยกเลิก') return {success:false, message:'ไม่สามารถแก้ไขรายการนี้ได้'};
+    /* คืนจำนวนเดิมกลับเข้าสต๊อกชั่วคราวเพื่อคำนวณใหม่ */
+    (b.Items||[]).forEach(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.EquipmentID); if(eq) eq.AvailableQty += Number(it.Qty); });
+    for(const it of payload.items){
+      const eq = equipmentList.find(e=>e.EquipmentID===it.equipmentId);
+      if(!eq || it.qty > eq.AvailableQty){
+        /* ย้อนกลับ: หักจำนวนเดิมออกอีกครั้งเพื่อคงสภาพเดิมไว้ */
+        (b.Items||[]).forEach(it2=>{ const eq2=equipmentList.find(e=>e.EquipmentID===it2.EquipmentID); if(eq2) eq2.AvailableQty -= Number(it2.Qty); });
+        return {success:false, message:`อุปกรณ์ไม่พอสำหรับ ${eq ? eq.Name : it.equipmentId}`};
+      }
+    }
+    payload.items.forEach(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.equipmentId); eq.AvailableQty -= Number(it.qty); });
+    b.BorrowerName = payload.borrowerName; b.StudentID = payload.studentId; b.Phone = payload.phone;
+    b.BorrowDate = payload.borrowDate; b.DueDate = payload.dueDate; b.Note = payload.note || '';
+    b.Items = payload.items.map(it=>{ const eq=equipmentList.find(e=>e.EquipmentID===it.equipmentId); return {EquipmentID:it.equipmentId, EquipmentName:eq?eq.Name:it.equipmentId, Qty:it.qty}; });
+    return {success:true};
+  }
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'editBooking', payload:{id, ...payload, passcode:adminPasscode}})});
+  return res.json();
+}
+async function apiCheckPasscode(passcode){
+  if(DEMO_MODE) return {success: passcode===DEMO_ADMIN_PASSCODE, message:'รหัสผ่านไม่ถูกต้อง'};
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'checkPasscode', payload:{passcode}})});
+  return res.json();
+}
+async function apiAddEquipment(payload){
+  if(DEMO_MODE){
+    const id = 'EQ-'+String(equipmentList.length+1).padStart(3,'0');
+    equipmentList.push({EquipmentID:id, Name:payload.name, Category:payload.category, TotalQty:payload.qty, AvailableQty:payload.qty, ImageURL:payload.image||''});
+    return {success:true, id};
+  }
+  const res = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'addEquipment', payload:{...payload, passcode:adminPasscode}})});
+  return res.json();
+}
+
+function setConnBanner(ok, msg){
+  const el = document.getElementById('connBanner');
+  document.getElementById('connText').textContent = msg;
+  el.classList.toggle('ok', ok); el.classList.toggle('demo', !ok);
+}
+function showToast(msg, ok=true){
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.style.background = ok ? '#0f9d58' : '#dc2626';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ---------- Derived helpers ---------- */
+function statusInfo(b){
+  if(b.Status === 'คืนแล้ว') return {label:'คืนแล้ว', cls:'returned'};
+  if(b.Status === 'ยกเลิก') return {label:'ยกเลิก', cls:'cancelled'};
+  if(b.Status === 'รอการอนุมัติ') return {label:'รออนุมัติ', cls:'pending'};
+  const days = daysBetween(fmtDate(today), b.DueDate);
+  if(days < 0) return {label:'เกินกำหนด', cls:'overdue'};
+  if(days === 0) return {label:'วันนี้', cls:'overdue'};
+  if(days === 1) return {label:'พรุ่งนี้', cls:'due-soon'};
+  if(days <= 3) return {label:`อีก ${days} วัน`, cls:'due-soon'};
+  return {label:'กำลังยืม', cls:'borrowing'};
+}
+function itemsSummary(b){
+  if(!b.Items || !b.Items.length) return '-';
+  return b.Items.map(it=>`${it.EquipmentName} × ${it.Qty}`).join(', ');
+}
+
+/* ---------- Equipment thumbnail rendering ---------- */
+function equipThumbHtml(e){
+  const letter = esc((e.Name||'?').trim().charAt(0) || '?');
+  if(e.ImageURL){
+    return `<div class="eq-thumb"><img src="${escAttr(e.ImageURL)}" alt="${escAttr(e.Name)}" onerror="this.parentElement.classList.add('eq-thumb-fallback');this.parentElement.innerHTML='${letter}';"></div>`;
+  }
+  return `<div class="eq-thumb eq-thumb-fallback">${letter}</div>`;
+}
+
+/* ---------- Item picker (multi-select equipment component) ---------- */
+function ipAvailable(eq, prefix){
+  let avail = Number(eq.AvailableQty);
+  if(prefix==='edit') avail += Number(editOriginalItems[eq.EquipmentID]||0);
+  return avail;
+}
+function ipSelectedQty(prefix, eqId){
+  const it = pickerStates[prefix].items.find(x=>x.equipmentId===eqId);
+  return it ? it.qty : 0;
+}
+function renderIPGrid(prefix){
+  const grid = document.getElementById(prefix+'_ipGrid');
+  if(!grid) return;
+  const searchInput = document.querySelector(`.ip-search[data-prefix="${prefix}"]`);
+  const q = (searchInput?.value||'').toLowerCase();
+  const filtered = equipmentList.filter(e=> !q || (e.Name||'').toLowerCase().includes(q) || (e.Category||'').toLowerCase().includes(q));
+  grid.innerHTML = filtered.map(e=>{
+    const avail = ipAvailable(e, prefix);
+    const sel = ipSelectedQty(prefix, e.EquipmentID);
+    const disabled = avail<=0;
+    return `<div class="ip-card ${disabled && sel<=0 ?'ip-disabled':''}">
+      ${equipThumbHtml(e)}
+      <div class="ip-card-name">${esc(e.Name)}</div>
+      <div class="ip-card-avail">คงเหลือ ${avail}</div>
+      ${sel>0
+        ? `<div class="ip-stepper">
+             <button type="button" onclick="ipChangeQty('${prefix}','${e.EquipmentID}',-1)">−</button>
+             <span>${sel}</span>
+             <button type="button" onclick="ipChangeQty('${prefix}','${e.EquipmentID}',1)" ${sel>=avail?'disabled':''}>+</button>
+           </div>`
+        : `<button type="button" class="ip-add-btn" ${disabled?'disabled':''} onclick="ipAddItem('${prefix}','${e.EquipmentID}')">+ เพิ่ม</button>`
+      }
+    </div>`;
+  }).join('') || `<p class="ip-empty">ไม่พบอุปกรณ์ที่ค้นหา</p>`;
+}
+function renderIPSelected(prefix){
+  const box = document.getElementById(prefix+'_ipSelected');
+  if(!box) return;
+  const state = pickerStates[prefix];
+  if(!state.items.length){ box.innerHTML = `<p class="ip-empty">ยังไม่ได้เลือกอุปกรณ์</p>`; return; }
+  box.innerHTML = state.items.map(it=>{
+    const eq = equipmentList.find(e=>e.EquipmentID===it.equipmentId);
+    return `<div class="ip-selected-row">
+      <div class="ip-selected-info"><b>${esc(eq?eq.Name:it.equipmentId)}</b><span>จำนวน ${it.qty}</span></div>
+      <button type="button" class="ip-remove-btn" onclick="ipRemoveItem('${prefix}','${it.equipmentId}')">ลบ</button>
+    </div>`;
+  }).join('');
+}
+function ipAddItem(prefix, eqId){
+  const eq = equipmentList.find(e=>e.EquipmentID===eqId);
+  if(!eq) return;
+  const avail = ipAvailable(eq, prefix);
+  if(avail<=0) return;
+  const state = pickerStates[prefix];
+  const existing = state.items.find(x=>x.equipmentId===eqId);
+  if(existing){ if(existing.qty<avail) existing.qty++; } else { state.items.push({equipmentId:eqId, qty:1}); }
+  renderIPGrid(prefix); renderIPSelected(prefix);
+}
+function ipChangeQty(prefix, eqId, delta){
+  const state = pickerStates[prefix];
+  const it = state.items.find(x=>x.equipmentId===eqId);
+  if(!it) return;
+  const eq = equipmentList.find(e=>e.EquipmentID===eqId);
+  const avail = eq ? ipAvailable(eq, prefix) : 999;
+  it.qty += delta;
+  if(it.qty<=0){ state.items = state.items.filter(x=>x.equipmentId!==eqId); }
+  else if(it.qty>avail){ it.qty = avail; }
+  renderIPGrid(prefix); renderIPSelected(prefix);
+}
+function ipRemoveItem(prefix, eqId){
+  const state = pickerStates[prefix];
+  state.items = state.items.filter(x=>x.equipmentId!==eqId);
+  renderIPGrid(prefix); renderIPSelected(prefix);
+}
+function ipReset(prefix){
+  pickerStates[prefix] = {items:[]};
+  if(prefix==='edit') editOriginalItems = {};
+  const s = document.querySelector(`.ip-search[data-prefix="${prefix}"]`);
+  if(s) s.value = '';
+  renderIPGrid(prefix); renderIPSelected(prefix);
+}
+document.querySelectorAll('.ip-search').forEach(inp=>{
+  inp.addEventListener('input', ()=> renderIPGrid(inp.dataset.prefix));
+});
+
+/* ---------- Admin gate ---------- */
+function requireAdminOrPrompt(){
+  if(!adminPasscode){
+    showToast('กรุณาเข้าสู่ระบบเจ้าหน้าที่ที่เมนู "ตั้งค่า" ก่อนทำรายการนี้', false);
+    goToView('settings');
+    return false;
+  }
+  return true;
+}
+
+/* ---------- Navigation ---------- */
+const pageTitles = {
+  home:'หน้าหลัก', borrow:'ยืมอุปกรณ์', return:'คืนอุปกรณ์', approvals:'อนุมัติการจอง', allBorrows:'รายการยืมทั้งหมด',
+  equipment:'อุปกรณ์ทั้งหมด', users:'ผู้ใช้งาน', reports:'รายงาน', dueAlerts:'แจ้งเตือนวันคืน', settings:'ตั้งค่า'
+};
+function goToView(name){
+  if(name === 'logout'){
+    showToast('ออกจากระบบแล้ว (จำลอง)');
+    return;
+  }
+  document.querySelectorAll('.sb-nav button').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[name] || '';
+  document.getElementById('sidebar').classList.remove('open');
+  if(name==='allBorrows') renderAllBorrows();
+  if(name==='equipment') renderEquipment();
+  if(name==='users') renderUsers();
+  if(name==='reports') renderReports();
+  if(name==='dueAlerts') renderDueAlertsFull();
+  if(name==='approvals') renderApprovals();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('[data-view]').forEach(el=>{
+  el.addEventListener('click', ()=> goToView(el.dataset.view));
+});
+document.getElementById('hamburgerBtn').addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+});
+document.getElementById('bellBtn').addEventListener('click', ()=> goToView('dueAlerts'));
+
+/* ---------- Rendering: dashboard ---------- */
+function renderDashboard(){
+  const totalQty = equipmentList.reduce((s,e)=>s+Number(e.TotalQty),0);
+  const activeBorrows = borrowsList.filter(b=>b.Status==='กำลังยืม');
+  const pendingBorrows = borrowsList.filter(b=>b.Status==='รอการอนุมัติ');
+  const borrowingQty = activeBorrows.reduce((s,b)=>s+(b.Items||[]).reduce((s2,it)=>s2+Number(it.Qty),0),0);
+  const dueSoon = activeBorrows.filter(b=>{ const d=daysBetween(fmtDate(today), b.DueDate); return d>=0 && d<=3; });
+  const overdue = activeBorrows.filter(b=> daysBetween(fmtDate(today), b.DueDate) < 0);
+
+  document.getElementById('statTotal').innerHTML = `${totalQty} <span>รายการ</span>`;
+  document.getElementById('statBorrowing').innerHTML = `${activeBorrows.length} <span>รายการ</span>`;
+  document.getElementById('statBorrowingPct').textContent = totalQty ? `คิดเป็น ${Math.round(borrowingQty/totalQty*100)}%` : '';
+  document.getElementById('statPending').innerHTML = `${pendingBorrows.length} <span>รายการ</span>`;
+  document.getElementById('statDueSoon').innerHTML = `${dueSoon.length} <span>รายการ</span>`;
+  document.getElementById('statOverdue').innerHTML = `${overdue.length} <span>รายการ</span>`;
+  document.getElementById('overdueDot').style.display = overdue.length ? 'block' : 'none';
+  document.getElementById('bellBadge').textContent = dueSoon.length + overdue.length;
+
+  const recent = borrowsList.slice().sort((a,b)=> new Date(b.BorrowDate) - new Date(a.BorrowDate)).slice(0,5);
+  document.getElementById('recentBorrowsBody').innerHTML = recent.map(b=>{
+    const s = statusInfo(b);
+    return `<tr>
+      <td>${esc(b.BorrowID)}</td>
+      <td><div class="who-cell"><div class="who-avatar">${esc(shortName(b.BorrowerName))}</div>
+        <div><div class="who-name">${esc(b.BorrowerName)}</div><div class="who-sub">${esc(b.StudentID||'')}</div></div></div></td>
+      <td>${esc(itemsSummary(b))}</td>
+      <td>${b.BorrowDate}</td>
+      <td>${b.DueDate}</td>
+      <td><span class="badge ${s.cls}">${s.label}</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">ยังไม่มีรายการยืม</td></tr>`;
+
+  const reminders = activeBorrows
+    .map(b=>({b, days: daysBetween(fmtDate(today), b.DueDate)}))
+    .filter(x=> x.days <= 3)
+    .sort((a,c)=> a.days - c.days)
+    .slice(0,3);
+  document.getElementById('reminderList').innerHTML = reminders.map(({b,days})=>{
+    const label = days < 0 ? `เกินกำหนด ${Math.abs(days)} วัน` : days===0 ? 'วันนี้' : days===1 ? 'พรุ่งนี้' : `อีก ${days} วัน`;
+    const cls = days <= 0 ? 'today' : '';
+    return `<div class="reminder-item">
+      <div class="reminder-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg></div>
+      <div><div class="reminder-title">${esc(itemsSummary(b))}</div>
+      <div class="reminder-sub">โดย ${esc(b.BorrowerName)} · ครบกำหนด ${b.DueDate}</div></div>
+      <span class="badge ${days<=0?'overdue':'due-soon'}" style="margin-right:auto;">${label}</span>
+    </div>`;
+  }).join('') || `<div class="placeholder" style="padding:24px 10px;"><p>ไม่มีรายการใกล้ถึงกำหนดคืน</p></div>`;
+
+  renderApprovals();
+}
+
+/* ---------- Rendering: approvals ---------- */
+function updateApprovalsBadge(n){
+  const el = document.getElementById('approvalsNavBadge');
+  if(!el) return;
+  el.textContent = n;
+  el.style.display = n>0 ? 'flex' : 'none';
+}
+function renderApprovals(){
+  const box = document.getElementById('approvalsBody');
+  const pending = borrowsList.filter(b=>b.Status==='รอการอนุมัติ').sort((a,b)=> new Date(a.BorrowDate)-new Date(b.BorrowDate));
+  updateApprovalsBadge(pending.length);
+  if(!box) return;
+  if(!pending.length){
+    box.innerHTML = `<div class="placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><h3>ไม่มีรายการรอการอนุมัติ</h3><p>คำขอจองใหม่จะปรากฏที่นี่</p></div>`;
+    return;
+  }
+  box.innerHTML = `<div style="overflow-x:auto;"><table class="data-table">
+    <thead><tr><th>รหัส</th><th>ผู้ยืม</th><th>รายการอุปกรณ์</th><th>วันที่ยืม</th><th>กำหนดคืน</th><th>หมายเหตุ</th><th>จัดการ</th></tr></thead>
+    <tbody>${pending.map(b=>`<tr>
+      <td>${esc(b.BorrowID)}</td>
+      <td><div class="who-name">${esc(b.BorrowerName)}</div><div class="who-sub">${esc(b.StudentID||'')} · ${esc(b.Phone||'')}</div></td>
+      <td>${esc(itemsSummary(b))}</td>
+      <td>${b.BorrowDate}</td><td>${b.DueDate}</td>
+      <td>${esc(b.Note||'—')}</td>
+      <td><div class="action-btns">
+        <button class="btn-primary btn-xs" onclick="approveBookingClick('${b.BorrowID}')">✓ อนุมัติ</button>
+        <button class="btn-secondary btn-xs" onclick="openEditModal('${b.BorrowID}')">แก้ไข</button>
+        <button class="btn-secondary btn-xs" style="color:var(--red-600);" onclick="cancelBookingClick('${b.BorrowID}')">ยกเลิก</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+async function approveBookingClick(id){
+  if(!requireAdminOrPrompt()) return;
+  try{
+    const result = await apiApproveBooking(id);
+    if(result.success){
+      await refreshAll();
+      showToast('อนุมัติการจองสำเร็จ');
+      if(document.getElementById('view-allBorrows').classList.contains('active')) renderAllBorrows();
+    }else{
+      showToast(result.message||'อนุมัติไม่สำเร็จ', false);
+    }
+  }catch(err){ console.error(err); showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', false); }
+}
+async function cancelBookingClick(id){
+  if(!requireAdminOrPrompt()) return;
+  if(!confirm('ยืนยันการยกเลิกรายการจองนี้?')) return;
+  try{
+    const result = await apiCancelBooking(id);
+    if(result.success){
+      await refreshAll();
+      showToast('ยกเลิกรายการสำเร็จ');
+      if(document.getElementById('view-allBorrows').classList.contains('active')) renderAllBorrows();
+      if(document.getElementById('view-return').classList.contains('active') && document.getElementById('returnSearchInput').value) document.getElementById('returnSearchBtn').click();
+    }else{
+      showToast(result.message||'ยกเลิกไม่สำเร็จ', false);
+    }
+  }catch(err){ console.error(err); showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', false); }
+}
+
+/* ---------- Rendering: all borrows ---------- */
+function bookingActionsHtml(b){
+  const btns = [];
+  if(b.Status==='รอการอนุมัติ'){
+    btns.push(`<button class="btn-primary btn-xs" onclick="approveBookingClick('${b.BorrowID}')">อนุมัติ</button>`);
+  }
+  if(b.Status==='รอการอนุมัติ' || b.Status==='กำลังยืม'){
+    btns.push(`<button class="btn-secondary btn-xs" onclick="openEditModal('${b.BorrowID}')">แก้ไข</button>`);
+    btns.push(`<button class="btn-secondary btn-xs" style="color:var(--red-600);" onclick="cancelBookingClick('${b.BorrowID}')">ยกเลิก</button>`);
+  }
+  return btns.length ? `<div class="action-btns">${btns.join('')}</div>` : '—';
+}
+function renderAllBorrows(){
+  const q = (document.getElementById('allSearchInput').value || '').toLowerCase();
+  const statusFilter = document.getElementById('allStatusFilter').value;
+  const filtered = borrowsList.filter(b=>{
+    const matchQ = !q || (b.BorrowerName||'').toLowerCase().includes(q) || (b.StudentID||'').toLowerCase().includes(q) || itemsSummary(b).toLowerCase().includes(q) || (b.BorrowID||'').toLowerCase().includes(q);
+    const matchStatus = !statusFilter || b.Status === statusFilter;
+    return matchQ && matchStatus;
+  }).sort((a,b)=> new Date(b.BorrowDate) - new Date(a.BorrowDate));
+
+  document.getElementById('allBorrowsBody').innerHTML = filtered.map(b=>{
+    const s = statusInfo(b);
+    return `<tr>
+      <td>${esc(b.BorrowID)}</td>
+      <td><div class="who-cell"><div class="who-avatar">${esc(shortName(b.BorrowerName))}</div>
+        <div><div class="who-name">${esc(b.BorrowerName)}</div><div class="who-sub">${esc(b.StudentID||'')}</div></div></div></td>
+      <td>${esc(itemsSummary(b))}</td>
+      <td>${b.BorrowDate}</td>
+      <td>${b.DueDate}</td>
+      <td>${b.ReturnDate||'—'}</td>
+      <td><span class="badge ${s.cls}">${s.label}</span></td>
+      <td>${bookingActionsHtml(b)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">ไม่พบรายการ</td></tr>`;
+}
+document.getElementById('allFilterBtn').addEventListener('click', renderAllBorrows);
+document.getElementById('allSearchInput').addEventListener('keydown', e=>{ if(e.key==='Enter') renderAllBorrows(); });
+
+/* ---------- Rendering: equipment ---------- */
+function renderEquipment(){
+  const q = (document.getElementById('equipSearchInput').value || '').toLowerCase();
+  const filtered = equipmentList.filter(e=> !q || (e.Name||'').toLowerCase().includes(q) || (e.Category||'').toLowerCase().includes(q));
+  document.getElementById('equipGrid').innerHTML = filtered.map(e=>{
+    const pct = e.TotalQty ? Math.round(e.AvailableQty/e.TotalQty*100) : 0;
+    return `<div class="equip-card">
+      ${equipThumbHtml(e)}
+      <div class="equip-name">${esc(e.Name)}</div>
+      <div class="equip-cat">${esc(e.Category)}</div>
+      <div class="equip-qty"><span>คงเหลือ ${e.AvailableQty}</span><span>ทั้งหมด ${e.TotalQty}</span></div>
+      <div class="equip-bar"><div class="equip-bar-fill" style="width:${pct}%;"></div></div>
+    </div>`;
+  }).join('') || `<div class="placeholder"><p>ไม่พบอุปกรณ์</p></div>`;
+}
+document.getElementById('equipSearchInput').addEventListener('input', renderEquipment);
+
+/* ---------- Rendering: users ---------- */
+function renderUsers(){
+  const map = {};
+  borrowsList.forEach(b=>{
+    if(b.Status==='ยกเลิก') return;
+    const key = (b.StudentID||'') + '|' + (b.BorrowerName||'');
+    if(!map[key]) map[key] = {name:b.BorrowerName, studentId:b.StudentID, phone:b.Phone, count:0, active:0};
+    map[key].count++;
+    if(b.Status === 'กำลังยืม') map[key].active++;
+  });
+  const rows = Object.values(map).sort((a,b)=> b.count - a.count);
+  document.getElementById('usersBody').innerHTML = rows.map(u=>`<tr>
+    <td><div class="who-cell"><div class="who-avatar">${esc(shortName(u.name))}</div><div class="who-name">${esc(u.name)}</div></div></td>
+    <td>${esc(u.studentId||'—')}</td><td>${esc(u.phone||'—')}</td><td>${u.count}</td>
+    <td>${u.active ? `<span class="badge borrowing">${u.active} รายการ</span>` : '—'}</td>
+  </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">ยังไม่มีข้อมูลผู้ใช้งาน</td></tr>`;
+}
+
+/* ---------- Rendering: reports ---------- */
+function renderReports(){
+  const totalQty = equipmentList.reduce((s,e)=>s+Number(e.TotalQty),0);
+  const activeBorrows = borrowsList.filter(b=>b.Status==='กำลังยืม');
+  const pendingBorrows = borrowsList.filter(b=>b.Status==='รอการอนุมัติ');
+  const returned = borrowsList.filter(b=>b.Status==='คืนแล้ว');
+  const overdue = activeBorrows.filter(b=> daysBetween(fmtDate(today), b.DueDate) < 0);
+
+  document.getElementById('reportStatGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6M10 2v5.5L4.5 18a2 2 0 0 0 1.8 2.9h11.4a2 2 0 0 0 1.8-2.9L14 7.5V2"/></svg></div>
+      <div><div class="stat-label">อุปกรณ์ทั้งหมด</div><div class="stat-value">${totalQty} <span>รายการ</span></div></div></div>
+    <div class="stat-card"><div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+      <div><div class="stat-label">การยืมทั้งหมด (สะสม)</div><div class="stat-value">${borrowsList.length} <span>ครั้ง</span></div></div></div>
+    <div class="stat-card"><div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7l7-4z"/></svg></div>
+      <div><div class="stat-label">รอการอนุมัติ</div><div class="stat-value">${pendingBorrows.length} <span>รายการ</span></div></div></div>
+    <div class="stat-card"><div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+      <div><div class="stat-label">คืนแล้ว</div><div class="stat-value">${returned.length} <span>ครั้ง</span></div></div></div>
+    <div class="stat-card"><div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></div>
+      <div><div class="stat-label">เกินกำหนดคืน</div><div class="stat-value">${overdue.length} <span>รายการ</span></div></div></div>
+  `;
+
+  const counts = {};
+  borrowsList.forEach(b=>{ (b.Items||[]).forEach(it=>{ counts[it.EquipmentName] = (counts[it.EquipmentName]||0) + Number(it.Qty); }); });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max = top.length ? top[0][1] : 1;
+  document.getElementById('reportTopEquipment').innerHTML = top.map(([name,count])=>`
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span>${esc(name)}</span><span style="font-weight:700;">${count} ครั้ง</span></div>
+      <div class="equip-bar"><div class="equip-bar-fill" style="width:${Math.round(count/max*100)}%;"></div></div>
+    </div>
+  `).join('') || `<p style="color:var(--muted);">ยังไม่มีข้อมูลการยืม</p>`;
+}
+
+/* ---------- Rendering: due alerts full ---------- */
+function renderDueAlertsFull(){
+  const activeBorrows = borrowsList.filter(b=>b.Status==='กำลังยืม')
+    .map(b=>({b, days: daysBetween(fmtDate(today), b.DueDate)}))
+    .sort((a,c)=> a.days - c.days);
+  document.getElementById('dueAlertsFull').innerHTML = activeBorrows.map(({b,days})=>{
+    const label = days < 0 ? `เกินกำหนด ${Math.abs(days)} วัน` : days===0 ? 'วันนี้' : days===1 ? 'พรุ่งนี้' : `อีก ${days} วัน`;
+    const cls = days <= 0 ? 'today' : '';
+    return `<div class="reminder-item">
+      <div class="reminder-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg></div>
+      <div><div class="reminder-title">${esc(itemsSummary(b))} <span style="color:var(--muted);font-weight:500;">(${esc(b.BorrowID)})</span></div>
+      <div class="reminder-sub">โดย ${esc(b.BorrowerName)} · ${esc(b.StudentID||'')} · ครบกำหนด ${b.DueDate}</div></div>
+      <span class="badge ${days<=0?'overdue':'due-soon'}" style="margin-right:auto;">${label}</span>
+    </div>`;
+  }).join('') || `<div class="placeholder"><p>ไม่มีรายการที่ต้องแจ้งเตือน</p></div>`;
+}
+
+/* ---------- Borrow form (multi-item) ---------- */
+const bBorrowDate = document.getElementById('b_borrowDate');
+const bDueDate = document.getElementById('b_dueDate');
+bBorrowDate.value = fmtDate(today);
+(function(){ const d=new Date(); d.setDate(d.getDate()+7); bDueDate.value = fmtDate(d); })();
+
+function showFieldError(input){ input.classList.add('err'); const err=input.closest('.field').querySelector('.err-msg'); if(err) err.classList.add('show'); }
+function clearFieldError(input){ input.classList.remove('err'); const err=input.closest('.field').querySelector('.err-msg'); if(err) err.classList.remove('show'); }
+document.querySelectorAll('#borrowForm input, #borrowForm select').forEach(el=>{
+  el.addEventListener('input', ()=>clearFieldError(el));
+  el.addEventListener('change', ()=>clearFieldError(el));
+});
+
+document.getElementById('borrowForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const name = document.getElementById('b_name');
+  const studentId = document.getElementById('b_studentId');
+  const phone = document.getElementById('b_phone');
+  const note = document.getElementById('b_note');
+  [name, studentId, phone].forEach(clearFieldError);
+  document.getElementById('bform_ipErr').classList.remove('show');
+
+  let valid = true;
+  if(!name.value.trim()){ showFieldError(name); valid=false; }
+  if(!studentId.value.trim()){ showFieldError(studentId); valid=false; }
+  const phoneClean = phone.value.replace(/[^0-9]/g,'');
+  if(!phoneClean || phoneClean.length < 9){ showFieldError(phone); valid=false; }
+  if(bDueDate.value <= bBorrowDate.value){ showFieldError(bDueDate); valid=false; } else { clearFieldError(bDueDate); }
+  const items = pickerStates.bform.items;
+  if(!items.length){ document.getElementById('bform_ipErr').classList.add('show'); valid=false; }
+
+  if(!valid){ showToast('กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง', false); return; }
+
+  const immediateApprove = document.getElementById('b_immediateApprove').checked;
+  const btn = document.getElementById('borrowSubmitBtn');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try{
+    const result = await apiBorrow({
+      borrowerName:name.value.trim(), studentId:studentId.value.trim(), phone:phone.value.trim(),
+      items: items.map(it=>({equipmentId:it.equipmentId, qty:it.qty})),
+      borrowDate:bBorrowDate.value, dueDate:bDueDate.value, note:note.value.trim(),
+      immediateApprove
+    });
+    if(result.success){
+      await refreshAll();
+      showToast(immediateApprove ? 'บันทึกการยืมสำเร็จ' : 'ส่งคำขอจองสำเร็จ รอการอนุมัติจากเจ้าหน้าที่');
+      this.reset();
+      document.getElementById('b_immediateApprove').checked = true;
+      bBorrowDate.value = fmtDate(today);
+      const d=new Date(); d.setDate(d.getDate()+7); bDueDate.value = fmtDate(d);
+      ipReset('bform');
+    }else{
+      showToast(result.message || 'บันทึกไม่สำเร็จ', false);
+    }
+  }catch(err){
+    console.error(err);
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', false);
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg> บันทึกการยืม';
+  }
+});
+document.getElementById('borrowResetBtn').addEventListener('click', ()=>{
+  document.getElementById('borrowForm').reset();
+  document.querySelectorAll('#borrowForm .err').forEach(clearFieldError);
+  document.getElementById('bform_ipErr').classList.remove('show');
+  bBorrowDate.value = fmtDate(today);
+  const d=new Date(); d.setDate(d.getDate()+7); bDueDate.value = fmtDate(d);
+  ipReset('bform');
+});
+
+/* ---------- Return form ---------- */
+function renderReturnResults(list){
+  const body = document.getElementById('returnBody');
+  const active = list.filter(b=>b.Status === 'กำลังยืม');
+  if(!active.length){
+    body.innerHTML = `<div class="placeholder"><h3>ไม่พบรายการที่ยังไม่คืน</h3><p>ลองตรวจสอบรหัสการยืมหรือชื่อผู้ยืมอีกครั้ง (รายการที่รอการอนุมัติจะยังไม่แสดงในหน้านี้)</p></div>`;
+    return;
+  }
+  body.innerHTML = `<div style="overflow-x:auto;"><table class="data-table">
+    <thead><tr><th>รหัสการยืม</th><th>ผู้ยืม</th><th>รายการอุปกรณ์</th><th>กำหนดคืน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+    <tbody>${active.map(b=>{
+      const s = statusInfo(b);
+      return `<tr>
+        <td>${esc(b.BorrowID)}</td>
+        <td><div class="who-name">${esc(b.BorrowerName)}</div><div class="who-sub">${esc(b.StudentID||'')}</div></td>
+        <td>${esc(itemsSummary(b))}</td><td>${b.DueDate}</td>
+        <td><span class="badge ${s.cls}">${s.label}</span></td>
+        <td><button class="btn-primary btn-xs" onclick="doReturn('${b.BorrowID}')">✓ รับคืนทั้งหมด</button></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+document.getElementById('returnSearchBtn').addEventListener('click', ()=>{
+  const q = (document.getElementById('returnSearchInput').value||'').toLowerCase();
+  const filtered = !q ? borrowsList : borrowsList.filter(b=>
+    (b.BorrowID||'').toLowerCase().includes(q) || (b.BorrowerName||'').toLowerCase().includes(q) || (b.StudentID||'').toLowerCase().includes(q));
+  renderReturnResults(filtered);
+});
+document.getElementById('returnSearchInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('returnSearchBtn').click(); });
+
+async function doReturn(id){
+  try{
+    const result = await apiReturn(id);
+    if(result.success){
+      await refreshAll();
+      showToast('รับคืนอุปกรณ์เรียบร้อยแล้ว');
+      document.getElementById('returnSearchBtn').click();
+    }else{
+      showToast(result.message || 'ดำเนินการไม่สำเร็จ', false);
+    }
+  }catch(err){
+    console.error(err);
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', false);
+  }
+}
+
+/* ---------- Edit booking modal ---------- */
+function openEditModal(id){
+  if(!requireAdminOrPrompt()) return;
+  const b = borrowsList.find(x=>x.BorrowID===id);
+  if(!b) return;
+  document.getElementById('edit_id').value = b.BorrowID;
+  document.getElementById('edit_name').value = b.BorrowerName || '';
+  document.getElementById('edit_studentId').value = b.StudentID || '';
+  document.getElementById('edit_phone').value = b.Phone || '';
+  document.getElementById('edit_borrowDate').value = b.BorrowDate;
+  document.getElementById('edit_dueDate').value = b.DueDate;
+  document.getElementById('edit_note').value = b.Note || '';
+  editOriginalItems = {};
+  (b.Items||[]).forEach(it=>{ editOriginalItems[it.EquipmentID] = (editOriginalItems[it.EquipmentID]||0) + Number(it.Qty); });
+  pickerStates.edit = {items:(b.Items||[]).map(it=>({equipmentId:it.EquipmentID, qty:Number(it.Qty)}))};
+  document.querySelectorAll('#editBookingForm .err').forEach(clearFieldError);
+  document.getElementById('edit_ipErr').classList.remove('show');
+  const editSearch = document.querySelector('.ip-search[data-prefix="edit"]');
+  if(editSearch) editSearch.value = '';
+  renderIPGrid('edit'); renderIPSelected('edit');
+  document.getElementById('editModalOverlay').classList.add('show');
+}
+function closeEditModal(){
+  document.getElementById('editModalOverlay').classList.remove('show');
+  pickerStates.edit = {items:[]};
+  editOriginalItems = {};
+}
+document.getElementById('editModalCloseBtn').addEventListener('click', closeEditModal);
+document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+document.getElementById('editModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='editModalOverlay') closeEditModal(); });
+document.querySelectorAll('#editBookingForm input').forEach(el=>{
+  el.addEventListener('input', ()=>clearFieldError(el));
+});
+document.getElementById('editBookingForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const id = document.getElementById('edit_id').value;
+  const name = document.getElementById('edit_name');
+  const studentId = document.getElementById('edit_studentId');
+  const phone = document.getElementById('edit_phone');
+  const borrowDate = document.getElementById('edit_borrowDate');
+  const dueDate = document.getElementById('edit_dueDate');
+  const note = document.getElementById('edit_note');
+  [name, studentId, phone].forEach(clearFieldError);
+  document.getElementById('edit_ipErr').classList.remove('show');
+
+  let valid = true;
+  if(!name.value.trim()){ showFieldError(name); valid=false; }
+  if(!studentId.value.trim()){ showFieldError(studentId); valid=false; }
+  const phoneClean = phone.value.replace(/[^0-9]/g,'');
+  if(!phoneClean || phoneClean.length<9){ showFieldError(phone); valid=false; }
+  if(dueDate.value <= borrowDate.value){ showFieldError(dueDate); valid=false; } else { clearFieldError(dueDate); }
+  const items = pickerStates.edit.items;
+  if(!items.length){ document.getElementById('edit_ipErr').classList.add('show'); valid=false; }
+
+  if(!valid){ showToast('กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง', false); return; }
+
+  const btn = document.getElementById('editSubmitBtn');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try{
+    const result = await apiEditBooking(id, {
+      borrowerName:name.value.trim(), studentId:studentId.value.trim(), phone:phone.value.trim(),
+      items: items.map(it=>({equipmentId:it.equipmentId, qty:it.qty})),
+      borrowDate:borrowDate.value, dueDate:dueDate.value, note:note.value.trim()
+    });
+    if(result.success){
+      await refreshAll();
+      showToast('บันทึกการแก้ไขสำเร็จ');
+      closeEditModal();
+      if(document.getElementById('view-allBorrows').classList.contains('active')) renderAllBorrows();
+    }else{
+      showToast(result.message || 'บันทึกไม่สำเร็จ', false);
+    }
+  }catch(err){
+    console.error(err);
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', false);
+  }finally{
+    btn.disabled = false; btn.textContent = 'บันทึกการแก้ไข';
+  }
+});
+
+/* ---------- Settings / login / add equipment (with image) ---------- */
+document.getElementById('settingsLoginBtn').addEventListener('click', async ()=>{
+  const input = document.getElementById('settingsPasscodeInput');
+  const val = input.value.trim();
+  if(!val){ showToast('กรุณากรอกรหัสผ่าน', false); return; }
+  const result = await apiCheckPasscode(val);
+  if(result.success){
+    adminPasscode = val;
+    document.getElementById('settingsLoginBox').style.display = 'none';
+    document.getElementById('settingsPanel').style.display = 'block';
+    input.value = '';
+    showToast('เข้าสู่ระบบเจ้าหน้าที่สำเร็จ');
+  }else{
+    showToast(result.message || 'รหัสผ่านไม่ถูกต้อง', false);
+  }
+});
+document.getElementById('ae_image').addEventListener('input', updateAeImagePreview);
+document.getElementById('ae_imageFile').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    document.getElementById('ae_image').value = reader.result;
+    updateAeImagePreview();
+  };
+  reader.readAsDataURL(file);
+});
+function updateAeImagePreview(){
+  const url = document.getElementById('ae_image').value.trim();
+  const box = document.getElementById('ae_imagePreview');
+  if(url){
+    box.classList.remove('eq-thumb-fallback');
+    box.innerHTML = `<img src="${escAttr(url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display='none';">`;
+  }else{
+    box.innerHTML = '';
+  }
+}
+document.getElementById('addEquipForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const name = document.getElementById('ae_name').value.trim();
+  const category = document.getElementById('ae_category').value.trim();
+  const qty = Number(document.getElementById('ae_qty').value);
+  const image = document.getElementById('ae_image').value.trim();
+  if(!name || !category || !qty){ showToast('กรุณากรอกข้อมูลให้ครบถ้วน', false); return; }
+  const result = await apiAddEquipment({name, category, qty, image});
+  if(result.success){
+    await refreshAll();
+    showToast('เพิ่มอุปกรณ์สำเร็จ');
+    this.reset();
+    document.getElementById('ae_imagePreview').innerHTML = '';
+  }else{
+    showToast(result.message || 'เพิ่มอุปกรณ์ไม่สำเร็จ', false);
+  }
+});
+
+/* ---------- Initial load ---------- */
+async function refreshAll(){
+  equipmentList = await apiGetEquipment();
+  borrowsList = await apiGetBorrows();
+  renderIPGrid('bform'); renderIPSelected('bform');
+  renderDashboard();
+}
+(async function init(){
+  document.querySelectorAll('.app-logo-img').forEach(img=>{ img.src = LOGO_DATA_URI; });
+  if(DEMO_MODE){
+    buildDemoData();
+    setConnBanner(false, 'โหมดสาธิต — ยังไม่ได้ตั้งค่า SCRIPT_URL เชื่อมต่อ Google Sheet');
+  }else{
+    setConnBanner(true, 'กำลังโหลดข้อมูลจาก Google Sheet...');
+  }
+  await refreshAll();
+  if(!DEMO_MODE) setConnBanner(true, 'เชื่อมต่อฐานข้อมูล Google Sheet แล้ว');
+})();
+</script>
+</body>
+</html>
